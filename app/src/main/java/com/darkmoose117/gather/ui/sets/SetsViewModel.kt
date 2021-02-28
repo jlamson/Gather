@@ -25,6 +25,9 @@ class SetsViewModel : ViewModel() {
     private val _viewState = MutableLiveData<SetsViewState>(Loading)
     val viewState = Transformations.distinctUntilChanged(_viewState)
 
+    private var sortedBy = SortedBy.Name
+    private var loadedSets: List<MtgSet>? = null
+
     fun loadSets() {
         _viewState.postValue(Loading)
         viewModelScope.launch(contextProvider.IO) {
@@ -32,7 +35,8 @@ class SetsViewModel : ViewModel() {
             if (response.isSuccessful) {
                 val sets = response.body()
                 if (sets != null) {
-                    _viewState.postValue(Success(sets))
+                    loadedSets = sets
+                    updateList()
                 } else {
                     _viewState.postValue(Failure(Throwable("No sets returned")))
                 }
@@ -41,15 +45,46 @@ class SetsViewModel : ViewModel() {
             }
         }
     }
+
+    fun toggleSort() {
+        sortedBy = when (sortedBy) {
+            SortedBy.Name -> SortedBy.Date
+            SortedBy.Date -> SortedBy.Name
+        }
+
+        updateList()
+    }
+
+    private fun updateList() {
+        val safeSets = loadedSets ?: return
+        val safeSort = sortedBy
+        _viewState.postValue(
+            Success(
+                safeSets.sortedWith(safeSort),
+                safeSort
+            )
+        )
+    }
+
+    private fun List<MtgSet>.sortedWith(sort: SortedBy): List<MtgSet> = when (sort) {
+        SortedBy.Name -> this.sortedBy { it.name }
+        SortedBy.Date -> this.sortedByDescending { it.releaseDate.millis }
+    }
 }
 
 @Immutable
 sealed class SetsViewState {
     object Loading : SetsViewState()
     data class Success(
-        val sets: List<MtgSet>
+        val sets: List<MtgSet>,
+        val sortBy: SortedBy
     ) : SetsViewState()
     class Failure(
         val throwable: Throwable
     ) : SetsViewState()
+}
+
+@Immutable
+enum class SortedBy {
+    Name, Date
 }

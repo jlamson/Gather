@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -21,6 +23,8 @@ class SetsFragment : Fragment() {
 
     private val viewModel: SetsViewModel by viewModels()
 
+    @ExperimentalAnimationApi
+    @ExperimentalFoundationApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,7 +45,10 @@ class SetsFragment : Fragment() {
             val viewState by viewModel.viewState.observeAsState(SetsViewState.Loading)
             CompositionLocalProvider(LocalWindowInsets provides windowInsets) {
                 GatherTheme {
-                    SetsScreen(viewState)
+                    SetsScreen(
+                        viewState,
+                        onToggleSort = { viewModel.toggleSort() }
+                    )
                 }
             }
         }
