@@ -2,4 +2,6 @@
     <string name="app_name">Gather</string>
     <string name="back">Back</string>
     <string name="loading">Loading…</string>
+
+    <string name="generic_error">Oops, something went wrong. Check your internet and try again.</string>
 </resources>
