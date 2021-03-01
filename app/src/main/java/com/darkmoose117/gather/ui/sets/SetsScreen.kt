@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +18,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -42,6 +46,7 @@ import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.GatherAppBar
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.util.ThemedPreview
+import com.google.android.material.chip.Chip
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import io.magicthegathering.kotlinsdk.model.set.MtgSet
@@ -88,25 +93,38 @@ fun SetList(state: SetsViewState.Success, onToggleSort: () -> Unit) {
         val listState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
 
-        LazyColumn(
-            Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 64.dp),
-            state = listState
-        ) {
-            val grouped: Map<String, List<MtgSet>> = when (state.sortBy) {
-                SortedBy.Name -> state.sets.groupBy {
-                    val first = it.name.first().toString()
-                    if (first.toIntOrNull() != null) "#" else first
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Types: ")
+                LazyRow(state = rememberLazyListState()) {
+                    items(state.typeFilterMap.keys.toList(), { it }) { type ->
+                        Box(Modifier.padding(4.dp)) {
+                            Chip(type) { /* handle type click */ }
+                        }
+                    }
                 }
-                SortedBy.Date -> state.sets.groupBy { it.releaseDate.year.toString() }
             }
-            grouped.forEach { (groupLabel, sets) ->
-                stickyHeader(groupLabel) {
-                    SetGroupHeader(groupLabel)
-                }
 
-                items(sets, { it.code }) { set ->
-                    SetItem(set)
+            LazyColumn(
+                Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 64.dp),
+                state = listState
+            ) {
+                val grouped: Map<String, List<MtgSet>> = when (state.sortBy) {
+                    SortedBy.Name -> state.sets.groupBy {
+                        val first = it.name.first().toString()
+                        if (first.toIntOrNull() != null) "#" else first
+                    }
+                    SortedBy.Date -> state.sets.groupBy { it.releaseDate.year.toString() }
+                }
+                grouped.forEach { (groupLabel, sets) ->
+                    stickyHeader(groupLabel) {
+                        SetGroupHeader(groupLabel)
+                    }
+
+                    items(sets, { it.code }) { set ->
+                        SetItem(set)
+                    }
                 }
             }
         }
@@ -167,6 +185,31 @@ fun SetItem(set: MtgSet) {
     }
 }
 
+@Composable
+fun Chip(
+    text: String,
+    onChipClick: (String) -> Unit,
+){
+    Surface(
+        elevation = 4.dp,
+        shape = RoundedCornerShape(percent = 50),
+        color = MaterialTheme.colors.primary
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .clickable(onClick = { onChipClick(text) })
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onPrimary,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
+}
+
 // region Previews
 
 val previewLoadingState = SetsViewState.Loading
@@ -178,12 +221,16 @@ val previewSuccessState = SetsViewState.Success(
             this.add(MtgSet(
                 code = "$char$char$char",
                 name = "Set named $char$char$char",
-                type = "",
+                type = "Promo",
                 releaseDate = DateTime.now(),
                 block = "$char$char$char"
             ))
         }
     },
+    mapOf(
+        "Promo" to true,
+        "Normal" to true
+    ),
     sortBy = SortedBy.Name
 )
 

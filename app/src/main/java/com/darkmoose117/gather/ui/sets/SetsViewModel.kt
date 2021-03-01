@@ -61,10 +61,16 @@ class SetsViewModel : ViewModel() {
         _viewState.postValue(
             Success(
                 safeSets.sortedWith(safeSort),
+                safeSets.types(),
                 safeSort
             )
         )
     }
+
+    private fun List<MtgSet>.types(): Map<String, Boolean> = this
+        .map { it.type }
+        .toSet()
+        .associateWith { type -> true } // TODO track filtered types
 
     private fun List<MtgSet>.sortedWith(sort: SortedBy): List<MtgSet> = when (sort) {
         SortedBy.Name -> this.sortedBy { it.name }
@@ -77,6 +83,7 @@ sealed class SetsViewState {
     object Loading : SetsViewState()
     data class Success(
         val sets: List<MtgSet>,
+        val typeFilterMap: Map<String, Boolean>,
         val sortBy: SortedBy
     ) : SetsViewState()
     class Failure(
