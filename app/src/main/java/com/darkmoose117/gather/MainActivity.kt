@@ -2,18 +2,27 @@ package com.darkmoose117.gather
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.darkmoose117.gather.databinding.ContentMainBinding
 import com.darkmoose117.gather.ui.components.GatherDrawer
 import com.darkmoose117.gather.ui.theme.GatherTheme
+import com.darkmoose117.gather.util.BackPressHandler
+import com.darkmoose117.gather.util.LocalBackPressedDispatcher
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,22 +34,51 @@ class MainActivity : AppCompatActivity() {
             // Provide WindowInsets to our content. We don't want to consume them, so that
             // they keep being pass down the view hierarchy (since we're using fragments).
             ProvideWindowInsets(consumeWindowInsets = false) {
-                GatherTheme {
-                    Scaffold(
-                        scaffoldState = rememberScaffoldState(),
-                        drawerContent = { GatherDrawer(
-                            onSetsClicked = {
-                                findNavController().navigate(R.id.setsFragment)
-                            },
-                            onSearchClicked = {
-                                findNavController().navigate(R.id.searchFragment)
+                CompositionLocalProvider(
+                    LocalBackPressedDispatcher provides this.onBackPressedDispatcher
+                ) {
+                    val scaffoldState = rememberScaffoldState()
+
+                    val scope = rememberCoroutineScope()
+
+                    val openDrawerEvent = viewModel.drawerShouldBeOpened.observeAsState()
+                    if (openDrawerEvent.value == true) {
+                        // Open drawer and reset state in VM.
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                            viewModel.resetOpenDrawerAction()
+                        }
+                    }
+
+                    // Intercepts back navigation when the drawer is open
+                    if (scaffoldState.drawerState.isOpen) {
+                        BackPressHandler {
+                            scope.launch { scaffoldState.drawerState.close() }
+                        }
+                    }
+
+                    // Drawer & Nav
+                    GatherTheme {
+                        Scaffold(
+                            scaffoldState = scaffoldState,
+                            drawerContent = {
+                                GatherDrawer(
+                                    onSetsClicked = {
+                                        findNavController().navigate(R.id.setsFragment)
+                                        scope.launch { scaffoldState.drawerState.close() }
+                                    },
+                                    onSearchClicked = {
+                                        findNavController().navigate(R.id.searchFragment)
+                                        scope.launch { scaffoldState.drawerState.close() }
+                                    }
+                                )
                             }
-                        ) }
-                    ) {
-                        // TODO: Fragments inflated via AndroidViewBinding don't work as expected
-                        //  https://issuetracker.google.com/179915946
-                        // AndroidViewBinding(ContentMainBinding::inflate)
-                        FragmentAwareAndroidViewBinding(ContentMainBinding::inflate)
+                        ) {
+                            // TODO: Fragments inflated via AndroidViewBinding don't work as expected
+                            //  https://issuetracker.google.com/179915946
+                            // AndroidViewBinding(ContentMainBinding::inflate)
+                            FragmentAwareAndroidViewBinding(ContentMainBinding::inflate)
+                        }
                     }
                 }
             }
