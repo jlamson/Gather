@@ -2,11 +2,10 @@ package com.darkmoose117.gather.ui.sets
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.FlingBehavior
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.FloatingActionButton
@@ -33,12 +31,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.darkmoose117.gather.R
@@ -46,7 +44,6 @@ import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.GatherAppBar
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.util.ThemedPreview
-import com.google.android.material.chip.Chip
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import io.magicthegathering.kotlinsdk.model.set.MtgSet
@@ -59,6 +56,7 @@ import org.joda.time.DateTime
 fun SetsScreen(
     viewState: SetsViewState,
     onToggleSort: () -> Unit,
+    onToggleType: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -78,7 +76,7 @@ fun SetsScreen(
             when (viewState) {
                 is SetsViewState.Loading -> LoadingCard()
                 is SetsViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is SetsViewState.Success -> SetList(viewState, onToggleSort)
+                is SetsViewState.Success -> SetList(viewState, onToggleSort, onToggleType)
             }
         }
     }
@@ -87,23 +85,14 @@ fun SetsScreen(
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
-fun SetList(state: SetsViewState.Success, onToggleSort: () -> Unit) {
+fun SetList(state: SetsViewState.Success, onToggleSort: () -> Unit, onToggleType: (String) -> Unit) {
     Box(modifier = Modifier.navigationBarsPadding()) {
         // Remember our own LazyListState
         val listState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
 
         Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Types: ")
-                LazyRow(state = rememberLazyListState()) {
-                    items(state.typeFilterMap.keys.toList(), { it }) { type ->
-                        Box(Modifier.padding(4.dp)) {
-                            Chip(type) { /* handle type click */ }
-                        }
-                    }
-                }
-            }
+            FilterRow(state, onToggleType)
 
             LazyColumn(
                 Modifier.fillMaxSize(),
@@ -185,26 +174,53 @@ fun SetItem(set: MtgSet) {
     }
 }
 
+
 @Composable
-fun Chip(
-    text: String,
-    onChipClick: (String) -> Unit,
-){
-    Surface(
-        elevation = 4.dp,
-        shape = RoundedCornerShape(percent = 50),
-        color = MaterialTheme.colors.primary
+private fun FilterRow(
+    state: SetsViewState.Success,
+    onToggleType: (String) -> Unit
+) {
+    LazyRow(
+        state = rememberLazyListState(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .clickable(onClick = { onChipClick(text) })
-        ) {
+        items(state.typeDescriptors, { it.type }) { typeDescriptor ->
+            Box(Modifier.padding(end = 8.dp)) {
+                TypeChip(typeDescriptor, onToggleType)
+            }
+        }
+    }
+}
+
+@Composable
+fun TypeChip(
+    typeDescriptor: TypeDescriptor,
+    onChipClick: (String) -> Unit,
+) {
+    val chipShape = RoundedCornerShape(percent = 50)
+    val backgroundColor by animateColorAsState(
+        if (typeDescriptor.shouldDisplay) MaterialTheme.colors.primary else MaterialTheme.colors.surface
+    )
+    val textColor by animateColorAsState(
+        if (typeDescriptor.shouldDisplay) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+    )
+    Surface(
+        modifier = Modifier
+            .border(2.dp, MaterialTheme.colors.primary, chipShape),
+        elevation = 2.dp,
+        shape = chipShape,
+        color = backgroundColor,
+        contentColor = textColor
+    ) {
+        Box(modifier = Modifier.clickable(onClick = { onChipClick(typeDescriptor.type) })) {
             Text(
-                text = text,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onPrimary,
-                modifier = Modifier.padding(8.dp)
+                text = "${typeDescriptor.type} (${typeDescriptor.count})",
+                style = MaterialTheme.typography.button,
+                maxLines = 1,
+                modifier = Modifier.padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp
+                )
             )
         }
     }
@@ -227,9 +243,9 @@ val previewSuccessState = SetsViewState.Success(
             ))
         }
     },
-    mapOf(
-        "Promo" to true,
-        "Normal" to true
+    listOf(
+        TypeDescriptor("FilterOn", 10,true),
+        TypeDescriptor("FilterOff", 8, false)
     ),
     sortBy = SortedBy.Name
 )
@@ -241,7 +257,7 @@ val testState = previewSuccessState
 @Preview(widthDp = 360, heightDp = 480, showBackground = true)
 @Composable
 fun LightSetsScreen() {
-    ThemedPreview { SetsScreen(testState, {}) }
+    ThemedPreview { SetsScreen(testState, {}, {}) }
 }
 
 @ExperimentalAnimationApi
@@ -249,7 +265,7 @@ fun LightSetsScreen() {
 @Preview(widthDp = 360, heightDp = 480, showBackground = true)
 @Composable
 fun DarkSetsScreen() {
-    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}) }
+    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}) }
 }
 
 // endregion

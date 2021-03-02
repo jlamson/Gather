@@ -27,6 +27,8 @@ class SetsViewModel : ViewModel() {
 
     private var sortedBy = SortedBy.Name
     private var loadedSets: List<MtgSet>? = null
+    private var typeFilters: MutableMap<String, Boolean> = mutableMapOf()
+    private var typeCount: Map<String, Int> = mapOf()
 
     fun loadSets() {
         _viewState.postValue(Loading)
@@ -36,6 +38,9 @@ class SetsViewModel : ViewModel() {
                 val sets = response.body()
                 if (sets != null) {
                     loadedSets = sets
+                    typeCount = sets.groupingBy { it.type }.eachCount()
+                    typeFilters = sets.map { it.type }.toSet().associateWith { true }.toMutableMap()
+
                     updateList()
                 } else {
                     _viewState.postValue(Failure(Throwable("No sets returned")))
@@ -55,27 +60,37 @@ class SetsViewModel : ViewModel() {
         updateList()
     }
 
+    fun toggleType(type: String) {
+        val previous = typeFilters[type]
+        if (previous != null) {
+            typeFilters[type] = !previous
+        }
+
+        updateList()
+    }
+
     private fun updateList() {
         val safeSets = loadedSets ?: return
         val safeSort = sortedBy
         _viewState.postValue(
             Success(
                 safeSets.sortedWith(safeSort),
-                safeSets.types(),
+                buildTypeDescriptors(),
                 safeSort
             )
         )
     }
 
-    private fun List<MtgSet>.types(): Map<String, Boolean> = this
-        .map { it.type }
-        .toSet()
-        .associateWith { type -> true } // TODO track filtered types
-
     private fun List<MtgSet>.sortedWith(sort: SortedBy): List<MtgSet> = when (sort) {
         SortedBy.Name -> this.sortedBy { it.name }
         SortedBy.Date -> this.sortedByDescending { it.releaseDate.millis }
+    }.filter {
+        typeFilters[it.type] == true
     }
+
+    private fun buildTypeDescriptors(): List<TypeDescriptor> = typeFilters.keys
+        .sortedByDescending { typeCount[it] }
+        .map { TypeDescriptor(it, typeCount[it]!!, typeFilters[it]!!) }
 }
 
 @Immutable
@@ -83,13 +98,19 @@ sealed class SetsViewState {
     object Loading : SetsViewState()
     data class Success(
         val sets: List<MtgSet>,
-        val typeFilterMap: Map<String, Boolean>,
+        val typeDescriptors: List<TypeDescriptor>,
         val sortBy: SortedBy
     ) : SetsViewState()
     class Failure(
         val throwable: Throwable
     ) : SetsViewState()
 }
+
+data class TypeDescriptor(
+    val type: String,
+    val count: Int,
+    val shouldDisplay: Boolean
+)
 
 @Immutable
 enum class SortedBy {

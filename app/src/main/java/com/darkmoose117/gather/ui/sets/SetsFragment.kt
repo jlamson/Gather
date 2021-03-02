@@ -47,7 +47,8 @@ class SetsFragment : Fragment() {
                 GatherTheme {
                     SetsScreen(
                         viewState,
-                        onToggleSort = { viewModel.toggleSort() }
+                        onToggleSort = { viewModel.toggleSort() },
+                        onToggleType = { viewModel.toggleType(it) }
                     )
                 }
             }
