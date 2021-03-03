@@ -25,7 +25,7 @@ class SetsViewModel : ViewModel() {
     private val _viewState = MutableLiveData<SetsViewState>(Loading)
     val viewState = Transformations.distinctUntilChanged(_viewState)
 
-    private var sortedBy = SortedBy.Name
+    private var sortedBy = SortedBy.Date
     private var loadedSets: List<MtgSet>? = null
     private var typeFilters: MutableMap<String, Boolean> = mutableMapOf()
     private var typeCount: Map<String, Int> = mapOf()
