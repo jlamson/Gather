@@ -20,15 +20,6 @@ fun SearchScreen(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        GatherAppBar(
-            // Use statusBarsPadding() to move the app bar content below the status bar
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding(),
-            onNavIconPressed = { },
-            title = { Text("Search") },
-            actions = { }
-        )
         Surface(
             color = MaterialTheme.colors.surface,
             contentColor = MaterialTheme.colors.onSurface

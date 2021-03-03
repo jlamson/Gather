@@ -3,7 +3,9 @@ package com.darkmoose117.gather
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,11 +15,13 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.darkmoose117.gather.databinding.ContentMainBinding
+import com.darkmoose117.gather.ui.components.GatherAppBar
 import com.darkmoose117.gather.ui.components.GatherBottomBar
 import com.darkmoose117.gather.ui.components.Tab
 import com.darkmoose117.gather.ui.theme.GatherTheme
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
+import dev.chrisbanes.accompanist.insets.statusBarsPadding
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +41,24 @@ class MainActivity : AppCompatActivity() {
                 // Drawer & Nav
                 GatherTheme {
                     Scaffold(
+                        topBar = {
+                            GatherAppBar(
+                                // Use statusBarsPadding() to move the app bar content below the status bar
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .statusBarsPadding(),
+                                onNavIconPressed = { },
+                                title = {
+                                    Text(
+                                        when (currentTab) {
+                                            Tab.Sets -> "Sets"
+                                            Tab.Search -> "Search"
+                                        }
+                                    )
+                                },
+                                actions = { }
+                            )
+                        },
                         bottomBar = {
                             GatherBottomBar(
                                 currentTab = currentTab,
