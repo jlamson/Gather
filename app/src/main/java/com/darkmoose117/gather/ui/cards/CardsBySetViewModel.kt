@@ -1,4 +1,4 @@
-package com.darkmoose117.gather.ui.sets
+package com.darkmoose117.gather.ui.cards
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +11,6 @@ import io.magicthegathering.kotlinsdk.model.card.MtgCard
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.jar.Attributes
 
 class CardsBySetViewModel : ViewModel() {
 

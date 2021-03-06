@@ -18,7 +18,7 @@
         android:label="SearchFragment" />
     <fragment
         android:id="@+id/cardsBySetFragment"
-        android:name="com.darkmoose117.gather.ui.sets.CardsBySetFragment"
+        android:name="com.darkmoose117.gather.ui.cards.CardsBySetFragment"
         android:label="CardsBySetFragment" >
         <argument
             android:name="setCode"

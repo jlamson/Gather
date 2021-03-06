@@ -1,4 +1,4 @@
-package com.darkmoose117.gather.ui.sets
+package com.darkmoose117.gather.ui.cards
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,8 +14,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavArgs
-import androidx.navigation.fragment.navArgs
 import com.darkmoose117.gather.ui.theme.GatherTheme
 import dev.chrisbanes.accompanist.insets.ExperimentalAnimatedInsets
 import dev.chrisbanes.accompanist.insets.LocalWindowInsets

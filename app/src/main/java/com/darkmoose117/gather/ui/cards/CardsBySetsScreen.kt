@@ -1,4 +1,4 @@
-package com.darkmoose117.gather.ui.sets
+package com.darkmoose117.gather.ui.cards
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.darkmoose117.gather.R
+import com.darkmoose117.gather.ui.components.CardListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
@@ -52,7 +54,7 @@ fun CardsByViewScreen(
             when (viewState) {
                 is CardsBySetViewState.Loading -> LoadingCard()
                 is CardsBySetViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is CardsBySetViewState.Success -> CardBySetList(viewState, onToggleSort)
+                is CardsBySetViewState.Success -> CardList(viewState.cards, viewState.cardsSortedBy, onToggleSort)
             }
         }
     }
@@ -62,8 +64,9 @@ fun CardsByViewScreen(
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
-fun CardBySetList(
-    state: CardsBySetViewState.Success,
+fun CardList(
+    cards: List<MtgCard>,
+    cardsSortedBy: CardsSortedBy,
     onToggleSort: () -> Unit
 ) {
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -96,15 +99,15 @@ fun CardBySetList(
         },
         sheetContent = {
             CardSortFilterBottomSheet(
-                sortedBy = state.cardsSortedBy,
+                sortedBy = cardsSortedBy,
                 onToggleSort = onToggleSort
             )
         },
         sheetPeekHeight = 0.dp,
     ) {
         ScrollToTopLazyColumn {
-            items(state.cards, { card: MtgCard -> card.id!! }) { card ->
-                Text(text = card.name)
+            items(cards, { card: MtgCard -> card.id!! }) { card ->
+                CardListItem(card = card, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
             }
         }
     }
