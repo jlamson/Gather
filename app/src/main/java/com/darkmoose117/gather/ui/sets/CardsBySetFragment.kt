@@ -12,21 +12,19 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavDirections
-import androidx.navigation.findNavController
-import com.darkmoose117.gather.R
+import androidx.navigation.NavArgs
+import androidx.navigation.fragment.navArgs
 import com.darkmoose117.gather.ui.theme.GatherTheme
 import dev.chrisbanes.accompanist.insets.ExperimentalAnimatedInsets
 import dev.chrisbanes.accompanist.insets.LocalWindowInsets
 import dev.chrisbanes.accompanist.insets.ViewWindowInsetObserver
 
 @ExperimentalAnimatedInsets
-class SetsFragment : Fragment() {
+class CardsBySetFragment : Fragment() {
 
-    private val viewModel: SetsViewModel by viewModels()
+    private val viewModel: CardsBySetViewModel by viewModels()
 
     @ExperimentalMaterialApi
     @ExperimentalAnimationApi
@@ -48,20 +46,12 @@ class SetsFragment : Fragment() {
             .start(windowInsetsAnimationsEnabled = true)
 
         setContent {
-            val viewState by viewModel.viewState.observeAsState(SetsViewState.Loading)
+            val viewState by viewModel.viewState.observeAsState(CardsBySetViewState.Loading)
             CompositionLocalProvider(LocalWindowInsets provides windowInsets) {
                 GatherTheme {
-                    SetsScreen(
+                    CardsByViewScreen(
                         viewState,
-                        onSetClicked = { setCode ->
-                            findNavController().navigate(
-                                R.id.cardsBySetFragment,
-                                bundleOf("setCode" to setCode)
-                            )
-                        },
-                        onToggleSort = { viewModel.toggleSort() },
-                        onToggleAllTypes = { viewModel.toggleAllTypes() },
-                        onToggleType = { viewModel.toggleType(it) }
+                        onToggleSort = { viewModel.toggleSort() }
                     )
                 }
             }
@@ -71,6 +61,6 @@ class SetsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.loadSets()
+        viewModel.loadCards(arguments?.getString("setCode"))
     }
 }

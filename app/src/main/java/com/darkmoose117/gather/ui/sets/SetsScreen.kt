@@ -67,6 +67,7 @@ import org.joda.time.DateTime
 @Composable
 fun SetsScreen(
     viewState: SetsViewState,
+    onSetClicked: (String) -> Unit,
     onToggleSort: () -> Unit,
     onToggleAllTypes: () -> Unit,
     onToggleType: (String) -> Unit,
@@ -80,7 +81,7 @@ fun SetsScreen(
             when (viewState) {
                 is SetsViewState.Loading -> LoadingCard()
                 is SetsViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is SetsViewState.Success -> SetList(viewState, onToggleSort, onToggleAllTypes, onToggleType)
+                is SetsViewState.Success -> SetList(viewState, onSetClicked, onToggleSort, onToggleAllTypes, onToggleType)
             }
         }
     }
@@ -92,6 +93,7 @@ fun SetsScreen(
 @Composable
 fun SetList(
     state: SetsViewState.Success,
+    onSetClicked: (String) -> Unit,
     onToggleSort: () -> Unit,
     onToggleAllTypes: () -> Unit,
     onToggleType: (String) -> Unit
@@ -148,7 +150,7 @@ fun SetList(
                 }
 
                 items(sets, { it.code }) { set ->
-                    SetItem(set)
+                    SetItem(set, modifier = Modifier.clickable(onClick = { onSetClicked(set.code) }))
                 }
             }
         }
@@ -173,9 +175,9 @@ private fun SetGroupHeader(groupLabel: String) {
 }
 
 @Composable
-fun SetItem(set: MtgSet) {
+fun SetItem(set: MtgSet, modifier: Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -351,7 +353,7 @@ fun BottomSheet() {
 @Preview(widthDp = 360, heightDp = 480, showBackground = true)
 @Composable
 fun LightSetsScreen() {
-    ThemedPreview { SetsScreen(testState, {}, {}, {}) }
+    ThemedPreview { SetsScreen(testState, {}, {}, {}, {}) }
 }
 
 //@ExperimentalMaterialApi
@@ -360,7 +362,7 @@ fun LightSetsScreen() {
 //@Preview(widthDp = 360, heightDp = 480, showBackground = true)
 //@Composable
 //fun DarkSetsScreen() {
-//    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}, {}) }
+//    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}, {}, {}) }
 //}
 
 // endregion
