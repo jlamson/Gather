@@ -27,7 +27,7 @@ fun GatherBottomBar(
 ) {
     BottomNavigation(Modifier.navigationBarsPadding()) {
         BottomNavigationItem(
-            selected = currentTab == Tab.Sets,
+            selected = currentTab is Tab.Sets || currentTab is Tab.CardBySet,
             onClick = onSetsClicked,
             icon = {
                 Icon(painterResource(id = R.drawable.ic_planewalker_24), contentDescription = null)
@@ -47,8 +47,10 @@ fun GatherBottomBar(
 }
 
 @Immutable
-enum class Tab {
-    Sets, Search
+sealed class Tab(val name: String) {
+    object Sets: Tab("Sets")
+    class CardBySet(setCode: String): Tab("Cards in $setCode")
+    object Search: Tab("Search")
 }
 
 

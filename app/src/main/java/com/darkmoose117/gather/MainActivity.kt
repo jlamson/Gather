@@ -6,13 +6,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.darkmoose117.gather.databinding.ContentMainBinding
 import com.darkmoose117.gather.ui.components.GatherAppBar
@@ -22,6 +25,8 @@ import com.darkmoose117.gather.ui.theme.GatherTheme
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import kotlinx.coroutines.launch
+import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,7 +41,23 @@ class MainActivity : AppCompatActivity() {
             // Provide WindowInsets to our content. We don't want to consume them, so that
             // they keep being pass down the view hierarchy (since we're using fragments).
             ProvideWindowInsets(consumeWindowInsets = false) {
-                var currentTab by remember { mutableStateOf(Tab.Sets) }
+                val scope = rememberCoroutineScope()
+                var currentTab by remember { mutableStateOf<Tab>(Tab.Sets) }
+
+                // Launched once, and only re-run when the key changes (Unit should never change.
+                LaunchedEffect(key1 = Unit) {
+                    findNavController().addOnDestinationChangedListener { _, destination, arguments ->
+                        // Make sure you are using a safe context to change
+                        scope.launch {
+                            currentTab = when (destination.id) {
+                                R.id.setsFragment -> Tab.Sets
+                                R.id.cardsBySetFragment -> Tab.CardBySet(arguments?.getString("setCode") ?: "???")
+                                R.id.searchFragment -> Tab.Search
+                                else -> throw IllegalStateException("Add missing Tab for destination: $destination")
+                            }
+                        }
+                    }
+                }
 
                 // Drawer & Nav
                 GatherTheme {
@@ -49,12 +70,7 @@ class MainActivity : AppCompatActivity() {
                                     .statusBarsPadding(),
                                 onNavIconPressed = { },
                                 title = {
-                                    Text(
-                                        when (currentTab) {
-                                            Tab.Sets -> "Sets"
-                                            Tab.Search -> "Search"
-                                        }
-                                    )
+                                    Text(currentTab.name)
                                 },
                                 actions = { }
                             )
@@ -63,11 +79,9 @@ class MainActivity : AppCompatActivity() {
                             GatherBottomBar(
                                 currentTab = currentTab,
                                 onSetsClicked = {
-                                    currentTab = Tab.Sets
                                     findNavController().navigate(R.id.setsFragment)
                                 },
                                 onSearchClicked = {
-                                    currentTab = Tab.Search
                                     findNavController().navigate(R.id.searchFragment)
                                 }
                             )
