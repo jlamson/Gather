@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -23,6 +24,7 @@ class SetsFragment : Fragment() {
 
     private val viewModel: SetsViewModel by viewModels()
 
+    @ExperimentalMaterialApi
     @ExperimentalAnimationApi
     @ExperimentalFoundationApi
     override fun onCreateView(
@@ -48,6 +50,7 @@ class SetsFragment : Fragment() {
                     SetsScreen(
                         viewState,
                         onToggleSort = { viewModel.toggleSort() },
+                        onToggleAllTypes = { viewModel.toggleAllTypes() },
                         onToggleType = { viewModel.toggleType(it) }
                     )
                 }

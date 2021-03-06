@@ -69,6 +69,15 @@ class SetsViewModel : ViewModel() {
         updateList()
     }
 
+    fun toggleAllTypes() {
+        val allEnabled = typeFilters.all { it.value }
+        typeFilters.forEach {
+            typeFilters[it.key] = !allEnabled
+        }
+
+        updateList()
+    }
+
     private fun updateList() {
         val safeSets = loadedSets ?: return
         val safeSort = sortedBy

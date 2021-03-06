@@ -4,10 +4,14 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,21 +19,29 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.Filter
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Sort
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,21 +53,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.ErrorCard
-import com.darkmoose117.gather.ui.components.GatherAppBar
 import com.darkmoose117.gather.ui.components.LoadingCard
+import com.darkmoose117.gather.ui.components.StaggeredGrid
 import com.darkmoose117.gather.util.ThemedPreview
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import io.magicthegathering.kotlinsdk.model.set.MtgSet
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 
+@ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
 fun SetsScreen(
     viewState: SetsViewState,
     onToggleSort: () -> Unit,
+    onToggleAllTypes: () -> Unit,
     onToggleType: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -67,23 +81,62 @@ fun SetsScreen(
             when (viewState) {
                 is SetsViewState.Loading -> LoadingCard()
                 is SetsViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is SetsViewState.Success -> SetList(viewState, onToggleSort, onToggleType)
+                is SetsViewState.Success -> SetList(viewState, onToggleSort, onToggleAllTypes, onToggleType)
             }
         }
     }
 }
 
+@ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
-fun SetList(state: SetsViewState.Success, onToggleSort: () -> Unit, onToggleType: (String) -> Unit) {
-    Box(modifier = Modifier.navigationBarsPadding()) {
-        // Remember our own LazyListState
-        val listState = rememberLazyListState()
-        val coroutineScope = rememberCoroutineScope()
+fun SetList(
+    state: SetsViewState.Success,
+    onToggleSort: () -> Unit,
+    onToggleAllTypes: () -> Unit,
+    onToggleType: (String) -> Unit
+) {
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scope = rememberCoroutineScope()
 
-        Column {
-            FilterRow(state, onToggleType)
+    val toggleBottomSheet: () -> Unit = {
+        scope.launch(Dispatchers.Main) {
+            if (scaffoldState.bottomSheetState.isExpanded) {
+                scaffoldState.bottomSheetState.collapse()
+            } else {
+                scaffoldState.bottomSheetState.expand()
+            }
+        }
+    }
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        modifier = Modifier.navigationBarsPadding(),
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = toggleBottomSheet,
+                // Currently applying extra padding for bottom nav, since this scaffold doesn't know
+                // about the bottom nav at the activity level.
+                modifier = Modifier.navigationBarsPadding().padding(bottom = 48.dp)
+            ) {
+                Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.toggle_sort))
+            }
+        },
+        sheetContent = {
+            SortFilterBottomSheet(
+                state = state,
+                onToggleSort = onToggleSort,
+                onToggleAllTypes = onToggleAllTypes,
+                onToggleType = onToggleType
+            )
+        },
+        sheetPeekHeight = 0.dp,
+    ) { bottomSheetPaddingValues ->
+        Box {
+            // Remember our own LazyListState
+            val listState = rememberLazyListState()
+            val coroutineScope = rememberCoroutineScope()
 
             LazyColumn(
                 Modifier.fillMaxSize(),
@@ -107,30 +160,23 @@ fun SetList(state: SetsViewState.Success, onToggleSort: () -> Unit, onToggleType
                     }
                 }
             }
-        }
 
-        val showButton = listState.firstVisibleItemIndex > 0
+            val showButton = listState.firstVisibleItemIndex > 0
 
-        AnimatedVisibility(
-            visible = showButton,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
-        ) {
-            Button(
-                onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
+            AnimatedVisibility(
+                visible = showButton,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp + bottomSheetPaddingValues.calculateBottomPadding())
             ) {
-                Icon(Icons.Outlined.ArrowUpward, contentDescription = null)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.scroll_to_stop))
+                Button(
+                    onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
+                ) {
+                    Icon(Icons.Outlined.ArrowUpward, contentDescription = null)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.scroll_to_stop))
+                }
             }
-        }
-
-        FloatingActionButton(onClick = onToggleSort, modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(16.dp)
-        ) {
-            Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.toggle_sort))
         }
     }
 }
@@ -165,21 +211,78 @@ fun SetItem(set: MtgSet) {
     }
 }
 
-
 @Composable
-private fun FilterRow(
+fun ColumnScope.SortFilterBottomSheet(
     state: SetsViewState.Success,
+    onToggleSort: () -> Unit,
+    onToggleAllTypes: () -> Unit,
     onToggleType: (String) -> Unit
 ) {
-    LazyRow(
-        state = rememberLazyListState(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
+    Row(
+        modifier = Modifier.padding(all = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.Start)
     ) {
-        items(state.typeDescriptors, { it.type }) { typeDescriptor ->
-            Box(Modifier.padding(end = 8.dp)) {
+        Button(
+            modifier = Modifier.weight(1f),
+            onClick = onToggleSort,
+            enabled = state.sortBy != SortedBy.Name
+        ) {
+            Text(text = "Sort by Name")
+        }
+        Button(
+            modifier = Modifier.weight(1f),
+            onClick = onToggleSort,
+            enabled = state.sortBy != SortedBy.Date
+        ) {
+            Text(text = "Sort by Date")
+        }
+    }
+
+    StaggeredGrid(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(8.dp)
+    ) {
+        Box(Modifier.padding(4.dp)) {
+            AllTypeChip(
+                enabled = state.typeDescriptors.all { it.shouldDisplay },
+                onClick = onToggleAllTypes
+            )
+        }
+
+        state.typeDescriptors.forEach { typeDescriptor ->
+            Box(Modifier.padding(4.dp)) {
                 TypeChip(typeDescriptor, onToggleType)
             }
         }
+    }
+}
+
+@Composable
+fun AllTypeChip(
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    val chipShape = RoundedCornerShape(percent = 50)
+    val backgroundColor by animateColorAsState(
+        if (enabled) MaterialTheme.colors.primary else MaterialTheme.colors.surface
+    )
+    val iconTint by animateColorAsState(
+        if (enabled) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+    )
+
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .background(backgroundColor, chipShape)
+            .border(2.dp, MaterialTheme.colors.primary, chipShape)
+            .size(40.dp)
+    ) {
+        Icon(Icons.Outlined.FilterList,
+            tint = iconTint,
+            modifier = Modifier.size(32.dp),
+            contentDescription = "Filter or Un-filter all types"
+        )
     }
 }
 
@@ -197,7 +300,8 @@ fun TypeChip(
     )
     Surface(
         modifier = Modifier
-            .border(2.dp, MaterialTheme.colors.primary, chipShape),
+            .border(2.dp, MaterialTheme.colors.primary, chipShape)
+            .defaultMinSize(minHeight = 40.dp),
         elevation = 2.dp,
         shape = chipShape,
         color = backgroundColor,
@@ -217,6 +321,7 @@ fun TypeChip(
     }
 }
 
+
 // region Previews
 
 val previewLoadingState = SetsViewState.Loading
@@ -224,10 +329,10 @@ val previewFailedState = SetsViewState.Failure(Throwable("Forced"))
 // should show AAA, DDD, CCC, BBB
 val previewSuccessState = SetsViewState.Success(
     sets = mutableListOf<MtgSet>().apply {
-        for (char in CharRange('A', 'Z')) {
+        for (char in listOf('A', 'A', 'A', 'B', 'B', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C')) {
             this.add(MtgSet(
                 code = "$char$char$char",
-                name = "Set named $char$char$char",
+                name = "$char$char$char Set named ",
                 type = "Promo",
                 releaseDate = DateTime.now(),
                 block = "$char$char$char"
@@ -236,27 +341,52 @@ val previewSuccessState = SetsViewState.Success(
     },
     listOf(
         TypeDescriptor("FilterOn", 10,true),
-        TypeDescriptor("FilterOff", 8, false)
+        TypeDescriptor("FilterOff", 8, false),
+        TypeDescriptor("FilterA", 18894, true),
+        TypeDescriptor("FilterB", 1, false),
+        TypeDescriptor("FilterC", 17, true),
+        TypeDescriptor("FilterD", 22, false),
+        TypeDescriptor("FilterOn", 10,false),
+        TypeDescriptor("FilterOff", 8, true),
+        TypeDescriptor("FilterA", 18894, false),
+        TypeDescriptor("FilterB", 1, true),
+        TypeDescriptor("FilterC", 17, false),
+        TypeDescriptor("FilterD", 22, true),
     ),
     sortBy = SortedBy.Name
 )
 
 val testState = previewSuccessState
 
+@ExperimentalMaterialApi
+@ExperimentalAnimationApi
+@ExperimentalFoundationApi
+@Preview(widthDp = 360, heightDp = 480, showBackground = true)
+@Composable
+fun BottomSheet() {
+    ThemedPreview(darkTheme = true) {
+        Column {
+            SortFilterBottomSheet(previewSuccessState, {}, {}, {})
+        }
+    }
+}
+
+@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @Preview(widthDp = 360, heightDp = 480, showBackground = true)
 @Composable
 fun LightSetsScreen() {
-    ThemedPreview { SetsScreen(testState, {}, {}) }
+    ThemedPreview { SetsScreen(testState, {}, {}, {}) }
 }
 
-@ExperimentalAnimationApi
-@ExperimentalFoundationApi
-@Preview(widthDp = 360, heightDp = 480, showBackground = true)
-@Composable
-fun DarkSetsScreen() {
-    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}) }
-}
+//@ExperimentalMaterialApi
+//@ExperimentalAnimationApi
+//@ExperimentalFoundationApi
+//@Preview(widthDp = 360, heightDp = 480, showBackground = true)
+//@Composable
+//fun DarkSetsScreen() {
+//    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}, {}) }
+//}
 
 // endregion
