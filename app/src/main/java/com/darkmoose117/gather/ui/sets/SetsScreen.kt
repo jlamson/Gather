@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.LoadingCard
+import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
 import com.darkmoose117.gather.ui.components.StaggeredGrid
 import com.darkmoose117.gather.util.ThemedPreview
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
@@ -116,7 +117,9 @@ fun SetList(
                 onClick = toggleBottomSheet,
                 // Currently applying extra padding for bottom nav, since this scaffold doesn't know
                 // about the bottom nav at the activity level.
-                modifier = Modifier.navigationBarsPadding().padding(bottom = 48.dp)
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(bottom = 48.dp)
             ) {
                 Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.toggle_sort))
             }
@@ -130,49 +133,22 @@ fun SetList(
             )
         },
         sheetPeekHeight = 0.dp,
-    ) { bottomSheetPaddingValues ->
-        Box {
-            // Remember our own LazyListState
-            val listState = rememberLazyListState()
-            val coroutineScope = rememberCoroutineScope()
-
-            LazyColumn(
-                Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 64.dp),
-                state = listState
-            ) {
-                val grouped: Map<String, List<MtgSet>> = when (state.setsSortedBy) {
-                    SetsSortedBy.Name -> state.sets.groupBy {
-                        val first = it.name.first().toString()
-                        if (first.toIntOrNull() != null) "#" else first
-                    }
-                    SetsSortedBy.Date -> state.sets.groupBy { it.releaseDate.year.toString() }
+    ) {
+        ScrollToTopLazyColumn {
+            val grouped: Map<String, List<MtgSet>> = when (state.setsSortedBy) {
+                SetsSortedBy.Name -> state.sets.groupBy {
+                    val first = it.name.first().toString()
+                    if (first.toIntOrNull() != null) "#" else first
                 }
-                grouped.forEach { (groupLabel, sets) ->
-                    stickyHeader(groupLabel) {
-                        SetGroupHeader(groupLabel)
-                    }
-
-                    items(sets, { it.code }) { set ->
-                        SetItem(set)
-                    }
-                }
+                SetsSortedBy.Date -> state.sets.groupBy { it.releaseDate.year.toString() }
             }
+            grouped.forEach { (groupLabel, sets) ->
+                stickyHeader(groupLabel) {
+                    SetGroupHeader(groupLabel)
+                }
 
-            val showButton = listState.firstVisibleItemIndex > 0
-
-            AnimatedVisibility(
-                visible = showButton,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp + bottomSheetPaddingValues.calculateBottomPadding())
-            ) {
-                Button(
-                    onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
-                ) {
-                    Icon(Icons.Outlined.ArrowUpward, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(R.string.scroll_to_stop))
+                items(sets, { it.code }) { set ->
+                    SetItem(set)
                 }
             }
         }
