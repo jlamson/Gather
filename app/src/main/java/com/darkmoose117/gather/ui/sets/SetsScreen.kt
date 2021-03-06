@@ -122,7 +122,7 @@ fun SetList(
             }
         },
         sheetContent = {
-            SortFilterBottomSheet(
+            SetSortFilterBottomSheet(
                 state = state,
                 onToggleSort = onToggleSort,
                 onToggleAllTypes = onToggleAllTypes,
@@ -210,7 +210,7 @@ fun SetItem(set: MtgSet) {
 }
 
 @Composable
-fun ColumnScope.SortFilterBottomSheet(
+fun ColumnScope.SetSortFilterBottomSheet(
     state: SetsViewState.Success,
     onToggleSort: () -> Unit,
     onToggleAllTypes: () -> Unit,
@@ -364,7 +364,7 @@ val testState = previewSuccessState
 fun BottomSheet() {
     ThemedPreview(darkTheme = true) {
         Column {
-            SortFilterBottomSheet(previewSuccessState, {}, {}, {})
+            SetSortFilterBottomSheet(previewSuccessState, {}, {}, {})
         }
     }
 }
