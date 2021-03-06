@@ -5,7 +5,7 @@
         <color
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:color="@color/yellow_900_dark" />
+            android:color="@color/yellow_900" />
     </item>
 
     <item android:drawable="@drawable/ic_planeswalker_48_24_blue"

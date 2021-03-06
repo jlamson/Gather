@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
+<!--    <item>-->
+<!--        <color android:color="@color/yellow_900" />-->
+<!--    </item>-->
+
     <item android:drawable="@drawable/ic_planeswalker_48_24_blue"
-        android:left="27dp"
-        android:right="27dp" />
+        android:left="34dp"
+        android:right="34dp"
+        android:top="24dp"
+        android:bottom="24dp"/>
 
 </layer-list>
