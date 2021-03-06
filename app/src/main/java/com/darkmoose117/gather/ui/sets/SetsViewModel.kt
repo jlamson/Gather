@@ -25,7 +25,7 @@ class SetsViewModel : ViewModel() {
     private val _viewState = MutableLiveData<SetsViewState>(Loading)
     val viewState = Transformations.distinctUntilChanged(_viewState)
 
-    private var sortedBy = SortedBy.Date
+    private var sortedBy = SetsSortedBy.Date
     private var loadedSets: List<MtgSet>? = null
     private var typeFilters: MutableMap<String, Boolean> = mutableMapOf()
     private var typeCount: Map<String, Int> = mapOf()
@@ -53,8 +53,8 @@ class SetsViewModel : ViewModel() {
 
     fun toggleSort() {
         sortedBy = when (sortedBy) {
-            SortedBy.Name -> SortedBy.Date
-            SortedBy.Date -> SortedBy.Name
+            SetsSortedBy.Name -> SetsSortedBy.Date
+            SetsSortedBy.Date -> SetsSortedBy.Name
         }
 
         updateList()
@@ -90,9 +90,9 @@ class SetsViewModel : ViewModel() {
         )
     }
 
-    private fun List<MtgSet>.sortedWith(sort: SortedBy): List<MtgSet> = when (sort) {
-        SortedBy.Name -> this.sortedBy { it.name }
-        SortedBy.Date -> this.sortedByDescending { it.releaseDate.millis }
+    private fun List<MtgSet>.sortedWith(sort: SetsSortedBy): List<MtgSet> = when (sort) {
+        SetsSortedBy.Name -> this.sortedBy { it.name }
+        SetsSortedBy.Date -> this.sortedByDescending { it.releaseDate.millis }
     }.filter {
         typeFilters[it.type] == true
     }
@@ -108,7 +108,7 @@ sealed class SetsViewState {
     data class Success(
         val sets: List<MtgSet>,
         val typeDescriptors: List<TypeDescriptor>,
-        val sortBy: SortedBy
+        val setsSortedBy: SetsSortedBy
     ) : SetsViewState()
     class Failure(
         val throwable: Throwable
@@ -122,6 +122,6 @@ data class TypeDescriptor(
 )
 
 @Immutable
-enum class SortedBy {
+enum class SetsSortedBy {
     Name, Date
 }

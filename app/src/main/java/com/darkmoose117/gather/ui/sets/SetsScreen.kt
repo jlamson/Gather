@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -38,7 +37,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.Filter
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -143,12 +141,12 @@ fun SetList(
                 contentPadding = PaddingValues(bottom = 64.dp),
                 state = listState
             ) {
-                val grouped: Map<String, List<MtgSet>> = when (state.sortBy) {
-                    SortedBy.Name -> state.sets.groupBy {
+                val grouped: Map<String, List<MtgSet>> = when (state.setsSortedBy) {
+                    SetsSortedBy.Name -> state.sets.groupBy {
                         val first = it.name.first().toString()
                         if (first.toIntOrNull() != null) "#" else first
                     }
-                    SortedBy.Date -> state.sets.groupBy { it.releaseDate.year.toString() }
+                    SetsSortedBy.Date -> state.sets.groupBy { it.releaseDate.year.toString() }
                 }
                 grouped.forEach { (groupLabel, sets) ->
                     stickyHeader(groupLabel) {
@@ -225,14 +223,14 @@ fun ColumnScope.SortFilterBottomSheet(
         Button(
             modifier = Modifier.weight(1f),
             onClick = onToggleSort,
-            enabled = state.sortBy != SortedBy.Name
+            enabled = state.setsSortedBy != SetsSortedBy.Name
         ) {
             Text(text = "Sort by Name")
         }
         Button(
             modifier = Modifier.weight(1f),
             onClick = onToggleSort,
-            enabled = state.sortBy != SortedBy.Date
+            enabled = state.setsSortedBy != SetsSortedBy.Date
         ) {
             Text(text = "Sort by Date")
         }
@@ -353,7 +351,7 @@ val previewSuccessState = SetsViewState.Success(
         TypeDescriptor("FilterC", 17, false),
         TypeDescriptor("FilterD", 22, true),
     ),
-    sortBy = SortedBy.Name
+    setsSortedBy = SetsSortedBy.Name
 )
 
 val testState = previewSuccessState
