@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -90,7 +91,9 @@ class MainActivity : AppCompatActivity() {
                         // TODO: Fragments inflated via AndroidViewBinding don't work as expected
                         //  https://issuetracker.google.com/179915946
                         // AndroidViewBinding(ContentMainBinding::inflate)
-                        FragmentAwareAndroidViewBinding(ContentMainBinding::inflate, Modifier.navigationBarsPadding())
+                        FragmentAwareAndroidViewBinding(
+                            ContentMainBinding::inflate
+                        )
                     }
                 }
             }

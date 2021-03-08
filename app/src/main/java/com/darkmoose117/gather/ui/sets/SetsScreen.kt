@@ -1,6 +1,5 @@
 package com.darkmoose117.gather.ui.sets
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -12,18 +11,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
@@ -36,7 +30,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -55,6 +48,8 @@ import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
 import com.darkmoose117.gather.ui.components.StaggeredGrid
 import com.darkmoose117.gather.util.ThemedPreview
+import com.darkmoose117.gather.util.bottomBarPadding
+import com.darkmoose117.gather.util.placeForFab
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
 import io.magicthegathering.kotlinsdk.model.set.MtgSet
 import kotlinx.coroutines.Dispatchers
@@ -113,15 +108,10 @@ fun SetList(
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.navigationBarsPadding(),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = toggleBottomSheet,
-                // Currently applying extra padding for bottom nav, since this scaffold doesn't know
-                // about the bottom nav at the activity level.
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(bottom = 48.dp)
+                modifier = Modifier.placeForFab()
             ) {
                 Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.toggle_sort))
             }

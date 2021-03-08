@@ -32,6 +32,8 @@ import com.darkmoose117.gather.ui.components.CardListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
+import com.darkmoose117.gather.util.bottomBarPadding
+import com.darkmoose117.gather.util.placeForFab
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
 import io.magicthegathering.kotlinsdk.model.card.MtgCard
 import kotlinx.coroutines.Dispatchers
@@ -84,15 +86,11 @@ fun CardList(
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.navigationBarsPadding(),
+        modifier = Modifier.bottomBarPadding(),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = toggleBottomSheet,
-                // Currently applying extra padding for bottom nav, since this scaffold doesn't know
-                // about the bottom nav at the activity level.
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(bottom = 48.dp)
+                modifier = Modifier.placeForFab()
             ) {
                 Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.toggle_sort))
             }

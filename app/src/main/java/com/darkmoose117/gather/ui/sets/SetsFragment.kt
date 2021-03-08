@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -19,9 +21,11 @@ import androidx.navigation.NavDirections
 import androidx.navigation.findNavController
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.theme.GatherTheme
+import com.darkmoose117.gather.util.bottomBarPadding
 import dev.chrisbanes.accompanist.insets.ExperimentalAnimatedInsets
 import dev.chrisbanes.accompanist.insets.LocalWindowInsets
 import dev.chrisbanes.accompanist.insets.ViewWindowInsetObserver
+import dev.chrisbanes.accompanist.insets.navigationBarsPadding
 
 @ExperimentalAnimatedInsets
 class SetsFragment : Fragment() {
@@ -61,7 +65,8 @@ class SetsFragment : Fragment() {
                         },
                         onToggleSort = { viewModel.toggleSort() },
                         onToggleAllTypes = { viewModel.toggleAllTypes() },
-                        onToggleType = { viewModel.toggleType(it) }
+                        onToggleType = { viewModel.toggleType(it) },
+                        modifier = Modifier.bottomBarPadding()
                     )
                 }
             }
