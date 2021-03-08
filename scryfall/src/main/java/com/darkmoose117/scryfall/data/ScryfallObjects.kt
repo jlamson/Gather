@@ -3,6 +3,7 @@ package com.darkmoose117.scryfall.data
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+@Suppress("UNUSED_PARAMETER")
 sealed class ScryfallObject(
     @Json(name = "object") objectType: ObjectType
 )
@@ -362,7 +363,7 @@ data class CardSymbol(
     /** An array of colors that this symbol represents. */
     @Json(name = "colors") val colors: Set<Color>,
     /** An array of plaintext versions of this symbol that Gatherer uses on old cards to describe original printed text. For example: {W} has ["oW", "ooW"] as alternates. */
-    @Json(name = "gatherer_alternates") val gathererAlternates: String?,
+    @Json(name = "gatherer_alternates") val gathererAlternates: List<String>? = null,
     /** A URI to an SVG image of this symbol on Scryfall’s CDNs. */
     @Json(name = "svg_uri") val svgUri: String?,
 ) : ScryfallObject(ObjectType.CardSymbolObject)

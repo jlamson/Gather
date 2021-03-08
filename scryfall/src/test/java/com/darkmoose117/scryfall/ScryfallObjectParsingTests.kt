@@ -1,6 +1,7 @@
 package com.darkmoose117.scryfall
 
 import com.darkmoose117.scryfall.data.Card
+import com.darkmoose117.scryfall.data.CardSymbol
 import com.darkmoose117.scryfall.data.DataList
 import com.darkmoose117.scryfall.data.Ruling
 import com.darkmoose117.scryfall.data.MagicSet
@@ -70,4 +71,14 @@ class ScryfallObjectParsingTests {
 
         assertEquals(3, rulings?.data?.size)
     }
-}
+
+    @Test
+    fun `should not crash on any symbols`() {
+        val jsonAsString = loadFileIntoString("all_symbols.json")
+
+        val responseType = Types.newParameterizedType(DataList::class.java, CardSymbol::class.java)
+        val adapter: JsonAdapter<DataList<CardSymbol>> = moshi.adapter(responseType)
+        val symbols = adapter.fromJson(jsonAsString)
+
+        assertEquals(true, symbols?.data?.find { it.symbol == "{2/W}" }?.representsMana)
+    }
