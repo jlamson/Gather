@@ -2,6 +2,7 @@ package com.darkmoose117.scryfall
 
 import com.darkmoose117.scryfall.data.Card
 import com.darkmoose117.scryfall.data.CardSymbol
+import com.darkmoose117.scryfall.data.Catalog
 import com.darkmoose117.scryfall.data.DataList
 import com.darkmoose117.scryfall.data.Ruling
 import com.darkmoose117.scryfall.data.MagicSet
@@ -82,3 +83,15 @@ class ScryfallObjectParsingTests {
 
         assertEquals(true, symbols?.data?.find { it.symbol == "{2/W}" }?.representsMana)
     }
+
+    @Test
+    fun `should not crash on any catalogs`() {
+        val jsonAsString = loadFileIntoString("catalog_land_types.json")
+
+        val adapter = moshi.adapter(Catalog::class.java)
+        val catalog = adapter.fromJson(jsonAsString)
+
+        assertEquals("https://api.scryfall.com/catalog/land-types", catalog?.uri)
+        assertEquals(13, catalog?.data?.size)
+    }
+}
