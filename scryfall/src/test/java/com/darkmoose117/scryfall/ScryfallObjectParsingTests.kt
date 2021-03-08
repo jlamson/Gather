@@ -3,7 +3,7 @@ package com.darkmoose117.scryfall
 import com.darkmoose117.scryfall.data.Card
 import com.darkmoose117.scryfall.data.DataList
 import com.darkmoose117.scryfall.data.Ruling
-import com.darkmoose117.scryfall.data.Set
+import com.darkmoose117.scryfall.data.MagicSet
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -49,5 +49,15 @@ class ScryfallObjectParsingTests {
         assertEquals(511, cardList?.totalCards)
     }
 
+    @Test
+    fun `should not crash on any set`() {
+        val jsonAsString = loadFileIntoString("all_sets.json")
+
+        val responseType = Types.newParameterizedType(DataList::class.java, MagicSet::class.java)
+        val adapter: JsonAdapter<DataList<MagicSet>> = moshi.adapter(responseType)
+        val allSets = adapter.fromJson(jsonAsString)
+
+        assertNotNull(allSets?.data?.find { it.code.equals("khm", ignoreCase = true) })
+    }
 
 }

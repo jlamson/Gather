@@ -2,7 +2,6 @@ package com.darkmoose117.scryfall.data
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import kotlin.collections.Set as SetCollection
 
 sealed class ScryfallObject(
     @Json(name = "object") objectType: ObjectType
@@ -11,7 +10,7 @@ sealed class ScryfallObject(
 enum class ObjectType(val type: Class<out ScryfallObject>, val jsonName: String) {
     ErrorObject(ScryfallError::class.java, "error"),
     ListObject(DataList::class.java, "list"),
-    SetObject(Set::class.java, "set"),
+    SetObject(MagicSet::class.java, "set"),
     CardObject(Card::class.java, "card"),
     RelatedCardObject(RelatedCard::class.java, "related_card"),
     CardFaceObject(CardFace::class.java, "card_face"),
@@ -53,7 +52,8 @@ data class DataList<T : ScryfallObject>(
 // region Sets
 
 /** [DOCS](https://scryfall.com/docs/api/sets) A Set object represents a group of related Magic cards. */
-data class Set(
+@JsonClass(generateAdapter = true)
+data class MagicSet(
     /** A unique ID for this set on Scryfall that will not change. */
     @Json(name = "id") val id: String = "",
     /** The unique three to five-letter code for this set. */
@@ -137,11 +137,11 @@ data class Card(
     /** The card’s converted mana cost. Note that some funny cards have fractional mana costs. */
     @Json(name = "cmc") val cmc: Float = 0.0f,
     /** This card’s color identity. */
-    @Json(name = "color_identity") val colorIdentity: SetCollection<Color> = emptySet(),
+    @Json(name = "color_identity") val colorIdentity: Set<Color> = emptySet(),
     /** The colors in this card’s color indicator, if any. A null value for this field indicates the card does not have one. */
-    @Json(name = "color_indicator") val colorIndicator: SetCollection<Color>? = null,
+    @Json(name = "color_indicator") val colorIndicator: Set<Color>? = null,
     /** This card’s colors, if the overall card has colors defined by the rules. Otherwise the colors will be on the card_faces objects, see below. */
-    @Json(name = "colors") val colors: SetCollection<Color>? = null,
+    @Json(name = "colors") val colors: Set<Color>? = null,
     /** This card’s overall rank/popularity on EDHREC. Not all cards are ranked. */
     @Json(name = "edhrec_rank") val edhrecRank: Int? = null,
     /** True if this printing exists in a foil version. */
@@ -171,7 +171,7 @@ data class Card(
     /** This card’s power, if any. Note that some cards have powers that are not numeric, such as *. */
     @Json(name = "power") val power: String? = null,
     /** Colors of mana that this card could produce. */
-    @Json(name = "produced_mana") val producedMana: SetCollection<Color>? = emptySet(),
+    @Json(name = "produced_mana") val producedMana: Set<Color>? = emptySet(),
     /** True if this card is on the Reserved List. */
     @Json(name = "reserved") val reserved: Boolean = false,
     /** This card’s toughness, if any. Note that some cards have toughnesses that are not numeric, such as *. */
@@ -199,13 +199,13 @@ data class Card(
     /** The flavor text, if any. */
     @Json(name = "flavor_text") val flavorText: String? = null,
     /** This card’s frame effects, if any. */
-    @Json(name = "frame_effects") val frameEffects: SetCollection<FrameEffect>? = null,
+    @Json(name = "frame_effects") val frameEffects: Set<FrameEffect>? = null,
     /** This card’s frame layout. */
     @Json(name = "frame") val frame: Frame = Frame.Original,
     /** True if this card’s artwork is larger than normal. */
     @Json(name = "full_art") val fullArt: Boolean = false,
     /** A list of games that this card print is available in, paper, arena, and/or mtgo. */
-    @Json(name = "games") val games: SetCollection<Games> = emptySet(),
+    @Json(name = "games") val games: Set<Games> = emptySet(),
     /** True if this card’s imagery is high resolution. */
     @Json(name = "highres_image") val highResImage: Boolean = false,
     /** A unique identifier for the card artwork that remains consistent across reprints. Newly spoiled cards may not have this field yet. */
@@ -288,9 +288,9 @@ data class CardFace(
     /** The name of the illustrator of this card face. Newly spoiled cards may not have this field yet. */
     @Json(name = "artist") val artist: String? = null,
     /** The colors in this face’s color indicator, if any. */
-    @Json(name = "color_indicator") val colorIndicator: SetCollection<Color>? = null,
+    @Json(name = "color_indicator") val colorIndicator: Set<Color>? = null,
     /** This face’s colors, if the game defines colors for the individual face of this card. */
-    @Json(name = "colors") val colors: SetCollection<Color>? = null,
+    @Json(name = "colors") val colors: Set<Color>? = null,
     /** The flavor text printed on this face, if any. */
     @Json(name = "flavor_text") val flavorText: String? = null,
     /** A unique identifier for the card face artwork that remains consistent across reprints. Newly spoiled cards may not have this field yet. */
@@ -360,7 +360,7 @@ data class CardSymbol(
     /** True if this symbol is only used on funny cards or Un-cards. */
     @Json(name = "funny") val funny: Boolean = false,
     /** An array of colors that this symbol represents. */
-    @Json(name = "colors") val colors: SetCollection<Color>,
+    @Json(name = "colors") val colors: Set<Color>,
     /** An array of plaintext versions of this symbol that Gatherer uses on old cards to describe original printed text. For example: {W} has ["oW", "ooW"] as alternates. */
     @Json(name = "gatherer_alternates") val gathererAlternates: String?,
     /** A URI to an SVG image of this symbol on Scryfall’s CDNs. */
