@@ -4,26 +4,25 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import kotlin.collections.Set as SetCollection
 
-@JsonClass(generateAdapter = true)
 sealed class ScryfallObject(
     @Json(name = "object") objectType: ObjectType
 )
 
-enum class ObjectType {
-    @Json(name = "error") Error,
-    @Json(name = "list") List,
-    @Json(name = "set") Set,
-    @Json(name = "card") Card,
-    @Json(name = "related_card") RelatedCard,
-    @Json(name = "card_face") CardFace,
-    @Json(name = "ruling") Ruling,
-    @Json(name = "card_symbol") CardSymbol,
-    @Json(name = "catalog") Catalog,
+enum class ObjectType(val type: Class<out ScryfallObject>, val jsonName: String) {
+    ErrorObject(ScryfallError::class.java, "error"),
+    ListObject(DataList::class.java, "list"),
+    SetObject(Set::class.java, "set"),
+    CardObject(Card::class.java, "card"),
+    RelatedCardObject(RelatedCard::class.java, "related_card"),
+    CardFaceObject(CardFace::class.java, "card_face"),
+    RulingObject(Ruling::class.java, "ruling"),
+    CardSymbolObject(CardSymbol::class.java, "card_symbol"),
+    CatalogObject(Catalog::class.java, "catalog"),
 }
 
 /** [DOCS](https://scryfall.com/docs/api/errors) An Error object represents a failure to find information or understand the input you provided to the API. Error objects are always transmitted with the appropriate `4XX` or `5XX` HTTP status code. */
 @JsonClass(generateAdapter = true)
-data class Error(
+data class ScryfallError(
     /** An integer HTTP status code for this error. */
     @Json(name = "status") val status: Int = 400,
     /** A computer-friendly string representing the appropriate HTTP status code. */
@@ -34,7 +33,7 @@ data class Error(
     @Json(name = "type") val type: String? = null,
     /** If your input also generated non-failure warnings, they will be provided as human-readable strings in this array. */
     @Json(name = "warnings") val warnings: List<String>? = null,
-) : ScryfallObject(ObjectType.Error)
+) : ScryfallObject(ObjectType.ErrorObject)
 
 /** [DOCS](https://scryfall.com/docs/api/lists) A List object represents a requested sequence of other objects (Cards, Sets, etc). List objects may be paginated, and also include information about issues raised when generating the list. */
 @JsonClass(generateAdapter = true)
@@ -49,7 +48,7 @@ data class DataList<T : ScryfallObject>(
     @Json(name = "total_cards") val totalCards: Int? = null,
     /** An array of human-readable warnings issued when generating this list, as strings. Warnings are non-fatal issues that the API discovered with your input. In general, they indicate that the List will not contain the all of the information you requested. You should fix the warnings and re-submit your request. */
     @Json(name = "warnings") val warnings: List<String>? = null,
-) : ScryfallObject(ObjectType.List)
+) : ScryfallObject(ObjectType.ListObject)
 
 // region Sets
 
@@ -93,7 +92,7 @@ data class Set(
     @Json(name = "icon_svg_uri") val iconSvgUri: String = "",
     /** A Scryfall API URI that you can request to begin paginating over the cards in this set. */
     @Json(name = "search_uri") val searchUri: String = "",
-) : ScryfallObject(ObjectType.Set)
+) : ScryfallObject(ObjectType.SetObject)
 
 // endregion
 
@@ -266,9 +265,10 @@ data class Card(
     /** The name of the source that previewed this card. */
     @Json(name = "preview.source") val previewSource: String? = null,
     // endregion
-) : ScryfallObject(ObjectType.Card)
+) : ScryfallObject(ObjectType.CardObject)
 
 /** [DOCS](https://scryfall.com/docs/api/cards) Cards that are closely related to other cards (because they call them by name, or generate a token, or meld, etc) have a all_parts property that contains Related Card objects. */
+@JsonClass(generateAdapter = true)
 data class RelatedCard(
     /** An unique ID for this card in Scryfall’s database. */
     @Json(name = "id") val id: Long = -1L,
@@ -280,9 +280,10 @@ data class RelatedCard(
     @Json(name = "type_line") val typeLine: String = "",
     /** A URI where you can retrieve a full object describing this card on Scryfall’s API. */
     @Json(name = "uri") val uri: String,
-) : ScryfallObject(ObjectType.RelatedCard)
+) : ScryfallObject(ObjectType.RelatedCardObject)
 
 /** [DOCS](https://scryfall.com/docs/api/cards) Multiface cards have a card_faces property containing at least two Card Face objects. */
+@JsonClass(generateAdapter = true)
 data class CardFace(
     /** The name of the illustrator of this card face. Newly spoiled cards may not have this field yet. */
     @Json(name = "artist") val artist: String? = null,
@@ -318,7 +319,7 @@ data class CardFace(
     @Json(name = "type_line") val typeLine: String = "",
     /** The watermark on this particular card face, if any. */
     @Json(name = "watermark") val watermark: String? = null,
-) : ScryfallObject(ObjectType.CardFace)
+) : ScryfallObject(ObjectType.CardFaceObject)
 
 // endregion
 
@@ -333,13 +334,14 @@ data class Ruling(
     @Json(name = "published_at") val publishedAt: String,
     /** The text of the ruling. */
     @Json(name = "comment") val comment: String,
-) : ScryfallObject(ObjectType.Ruling)
+) : ScryfallObject(ObjectType.RulingObject)
 
 // endregion
 
 // region CardSymbols
 
 /** [DOCS](https://scryfall.com/docs/api/card-symbols) A Card Symbol object represents an illustrated symbol that may appear in card’s mana cost or Oracle text. */
+@JsonClass(generateAdapter = true)
 data class CardSymbol(
     /** The plaintext symbol. Often surrounded with curly braces {}. Note that not all symbols are ASCII text (for example, {∞}). */
     @Json(name = "symbol") val symbol: String = "",
@@ -363,7 +365,7 @@ data class CardSymbol(
     @Json(name = "gatherer_alternates") val gathererAlternates: String?,
     /** A URI to an SVG image of this symbol on Scryfall’s CDNs. */
     @Json(name = "svg_uri") val svgUri: String?,
-) : ScryfallObject(ObjectType.CardSymbol)
+) : ScryfallObject(ObjectType.CardSymbolObject)
 
 // endregion
 
@@ -377,6 +379,6 @@ data class Catalog(
     @Json(name = "total_values") val total_values: Int,
     /** An array of datapoints, as strings. */
     @Json(name = "data") val data: List<String>,
-) : ScryfallObject(ObjectType.Catalog)
+) : ScryfallObject(ObjectType.CatalogObject)
 
 // endregion
