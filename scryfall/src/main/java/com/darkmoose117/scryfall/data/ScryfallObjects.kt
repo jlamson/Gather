@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonClass
 
 @Suppress("UNUSED_PARAMETER")
 sealed class ScryfallObject(
-    @Json(name = "object") objectType: ObjectType
+    @Json(name = "object") val objectType: ObjectType
 )
 
 enum class ObjectType(val type: Class<out ScryfallObject>, val jsonName: String) {
