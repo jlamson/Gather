@@ -1,9 +1,7 @@
 package com.darkmoose117.scryfall.data
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
-@JsonClass(generateAdapter = true)
 enum class BorderColor {
     @Json(name = "black") Black,
     @Json(name = "borderless") Borderless,
