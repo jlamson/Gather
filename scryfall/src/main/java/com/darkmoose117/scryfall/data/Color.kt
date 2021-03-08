@@ -8,4 +8,5 @@ enum class Color {
     @Json(name = "B") Black,
     @Json(name = "R") Red,
     @Json(name = "G") Green,
+    @Json(name = "C") Colorless,
 }

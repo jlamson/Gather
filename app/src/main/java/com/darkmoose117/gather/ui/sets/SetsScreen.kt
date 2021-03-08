@@ -52,7 +52,6 @@ import com.darkmoose117.gather.util.placeForFab
 import com.darkmoose117.scryfall.data.MagicSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.joda.time.DateTime
 
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
