@@ -48,10 +48,8 @@ import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
 import com.darkmoose117.gather.ui.components.StaggeredGrid
 import com.darkmoose117.gather.util.ThemedPreview
-import com.darkmoose117.gather.util.bottomBarPadding
 import com.darkmoose117.gather.util.placeForFab
-import dev.chrisbanes.accompanist.insets.navigationBarsPadding
-import io.magicthegathering.kotlinsdk.model.set.MtgSet
+import com.darkmoose117.scryfall.data.MagicSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.joda.time.DateTime
@@ -127,12 +125,12 @@ fun SetList(
         sheetPeekHeight = 0.dp,
     ) {
         ScrollToTopLazyColumn {
-            val grouped: Map<String, List<MtgSet>> = when (state.setsSortedBy) {
+            val grouped: Map<String, List<MagicSet>> = when (state.setsSortedBy) {
                 SetsSortedBy.Name -> state.sets.groupBy {
                     val first = it.name.first().toString()
                     if (first.toIntOrNull() != null) "#" else first
                 }
-                SetsSortedBy.Date -> state.sets.groupBy { it.releaseDate.year.toString() }
+                SetsSortedBy.Date -> state.sets.groupBy { it.releasedAt.substring(0..3) }
             }
             grouped.forEach { (groupLabel, sets) ->
                 stickyHeader(groupLabel) {
@@ -165,7 +163,7 @@ private fun SetGroupHeader(groupLabel: String) {
 }
 
 @Composable
-fun SetItem(set: MtgSet, modifier: Modifier) {
+fun SetItem(set: MagicSet, modifier: Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -294,14 +292,13 @@ val previewLoadingState = SetsViewState.Loading
 val previewFailedState = SetsViewState.Failure(Throwable("Forced"))
 // should show AAA, DDD, CCC, BBB
 val previewSuccessState = SetsViewState.Success(
-    sets = mutableListOf<MtgSet>().apply {
+    sets = mutableListOf<MagicSet>().apply {
         for (char in listOf('A', 'A', 'A', 'B', 'B', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C')) {
-            this.add(MtgSet(
+            this.add(MagicSet(
                 code = "$char$char$char",
-                name = "$char$char$char Set named ",
-                type = "Promo",
-                releaseDate = DateTime.now(),
-                block = "$char$char$char"
+                name = "$char$char$char Set name",
+                setType = "Promo",
+                releasedAt = "2021-02-25"
             ))
         }
     },

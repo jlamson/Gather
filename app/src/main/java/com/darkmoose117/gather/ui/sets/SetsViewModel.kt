@@ -9,8 +9,9 @@ import com.darkmoose117.gather.ui.sets.SetsViewState.Failure
 import com.darkmoose117.gather.ui.sets.SetsViewState.Loading
 import com.darkmoose117.gather.ui.sets.SetsViewState.Success
 import com.darkmoose117.gather.util.CoroutineContextProvider
-import io.magicthegathering.kotlinsdk.api.MtgSetApiClient
-import io.magicthegathering.kotlinsdk.model.set.MtgSet
+import com.darkmoose117.scryfall.ScryfallApi
+import com.darkmoose117.scryfall.api.ScryfallSetsApi
+import com.darkmoose117.scryfall.data.MagicSet
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -26,20 +27,23 @@ class SetsViewModel : ViewModel() {
     val viewState = Transformations.distinctUntilChanged(_viewState)
 
     private var sortedBy = SetsSortedBy.Date
-    private var loadedSets: List<MtgSet>? = null
+    private var loadedSets: List<MagicSet>? = null
     private var typeFilters: MutableMap<String, Boolean> = mutableMapOf()
     private var typeCount: Map<String, Int> = mapOf()
+
+    // TODO INJECT
+    private val setsApi: ScryfallSetsApi = ScryfallApi.setsApi
 
     fun loadSets() {
         _viewState.postValue(Loading)
         viewModelScope.launch(contextProvider.IO) {
-            val response = MtgSetApiClient.getAllSets()
+            val response = setsApi.getAllSets()
             if (response.isSuccessful) {
-                val sets = response.body()
-                if (sets != null) {
+                val sets = response.body()?.data
+                if (!sets.isNullOrEmpty()) {
                     loadedSets = sets
-                    typeCount = sets.groupingBy { it.type }.eachCount()
-                    typeFilters = sets.map { it.type }.toSet().associateWith { true }.toMutableMap()
+                    typeCount = sets.groupingBy { it.setType }.eachCount()
+                    typeFilters = sets.map { it.setType }.toSet().associateWith { true }.toMutableMap()
 
                     updateList()
                 } else {
@@ -90,11 +94,11 @@ class SetsViewModel : ViewModel() {
         )
     }
 
-    private fun List<MtgSet>.sortedWith(sort: SetsSortedBy): List<MtgSet> = when (sort) {
+    private fun List<MagicSet>.sortedWith(sort: SetsSortedBy): List<MagicSet> = when (sort) {
         SetsSortedBy.Name -> this.sortedBy { it.name }
-        SetsSortedBy.Date -> this.sortedByDescending { it.releaseDate.millis }
+        SetsSortedBy.Date -> this.sortedByDescending { it.releasedAt }
     }.filter {
-        typeFilters[it.type] == true
+        typeFilters[it.setType] == true
     }
 
     private fun buildTypeDescriptors(): List<TypeDescriptor> = typeFilters.keys
@@ -106,7 +110,7 @@ class SetsViewModel : ViewModel() {
 sealed class SetsViewState {
     object Loading : SetsViewState()
     data class Success(
-        val sets: List<MtgSet>,
+        val sets: List<MagicSet>,
         val typeDescriptors: List<TypeDescriptor>,
         val setsSortedBy: SetsSortedBy
     ) : SetsViewState()
