@@ -55,7 +55,7 @@ data class DataList<T : ScryfallObject>(
 /** [DOCS](https://scryfall.com/docs/api/sets) A Set object represents a group of related Magic cards. */
 data class Set(
     /** A unique ID for this set on Scryfall that will not change. */
-    @Json(name = "id") val id: Long = -1L,
+    @Json(name = "id") val id: String = "",
     /** The unique three to five-letter code for this set. */
     @Json(name = "code") val code: String = "",
     /** The unique code for this set on MTGO, which may differ from the regular code. */
@@ -105,27 +105,27 @@ data class Card(
     /** This card’s Arena ID, if any. A large percentage of cards are not available on Arena and do not have this ID. */
     @Json(name = "arena_id") val arenaId:  Int? = null,
     /** A unique ID for this card in Scryfall’s database. */
-    @Json(name = "id") val id:  Long = -1L,
+    @Json(name = "id") val id: String = "",
     /** A language code for this printing. */
-    @Json(name = "lang") val lang:  String = "",
+    @Json(name = "lang") val lang: String = "",
     /** This card’s Magic Online ID (also known as the Catalog ID), if any. A large percentage of cards are not available on Magic Online and do not have this ID. */
-    @Json(name = "mtgo_id") val mtgoId:  Int? = null,
+    @Json(name = "mtgo_id") val mtgoId: Int? = null,
     /** This card’s foil Magic Online ID (also known as the Catalog ID), if any. A large percentage of cards are not available on Magic Online and do not have this ID. */
-    @Json(name = "mtgo_foil_id") val mtgoFoilId:  Int? = null,
+    @Json(name = "mtgo_foil_id") val mtgoFoilId: Int? = null,
     /** This card’s multiverse IDs on Gatherer, if any, as an array of integers. Note that Scryfall includes many promo cards, tokens, and other esoteric objects that do not have these identifiers. */
-    @Json(name = "multiverse_ids") val multiverseIds:  List<Int>? = null,
+    @Json(name = "multiverse_ids") val multiverseIds: List<Int>? = null,
     /** This card’s ID on TCGplayer’s API, also known as the productId. */
-    @Json(name = "tcgplayer_id") val tcgplayerId:  Int? = null,
+    @Json(name = "tcgplayer_id") val tcgplayerId: Int? = null,
     /** This card’s ID on Cardmarket’s API, also known as the idProduct. */
-    @Json(name = "cardmarket_id") val cardmarketId:  Int? = null,
+    @Json(name = "cardmarket_id") val cardmarketId: Int? = null,
     /** A unique ID for this card’s oracle identity. This value is consistent across reprinted card editions, and unique among different cards with the same name (tokens, Unstable variants, etc). */
-    @Json(name = "oracle_id") val oracleId:  Long = -1L,
+    @Json(name = "oracle_id") val oracleId: String = "",
     /** A link to where you can begin paginating all re/prints for this card on Scryfall’s API. */
-    @Json(name = "prints_search_uri") val printsSearchUri:  String = "",
+    @Json(name = "prints_search_uri") val printsSearchUri: String = "",
     /** A link to this card’s rulings list on Scryfall’s API. */
-    @Json(name = "rulings_uri") val rulingsUri:  String = "",
+    @Json(name = "rulings_uri") val rulingsUri: String = "",
     /** A link to this card’s permapage on Scryfall’s website. */
-    @Json(name = "scryfall_uri") val scryfallUri:  String = "",
+    @Json(name = "scryfall_uri") val scryfallUri: String = "",
     /** A link to this card object on Scryfall’s API. */
     @Json(name = "uri") val uri: String = "",
     // endregion
@@ -187,7 +187,7 @@ data class Card(
     /** This card’s border color: black, borderless, gold, silver, or white. */
     @Json(name = "border_color") val borderColor: BorderColor = BorderColor.Black,
     /** The Scryfall ID for the card back design present on this card. */
-    @Json(name = "card_back_id") val cardBackId: Long = -1L,
+    @Json(name = "card_back_id") val cardBackId: String = "",
     /** This card’s collector number. Note that collector numbers can contain non-numeric characters, such as letters or ★. */
     @Json(name = "collector_number") val collectorNumber: String = "",
     /** True if you should consider avoiding use of this print downstream. */
@@ -209,7 +209,7 @@ data class Card(
     /** True if this card’s imagery is high resolution. */
     @Json(name = "highres_image") val highResImage: Boolean = false,
     /** A unique identifier for the card artwork that remains consistent across reprints. Newly spoiled cards may not have this field yet. */
-    @Json(name = "illustration_id") val illustrationId: Long? = null,
+    @Json(name = "illustration_id") val illustrationId: String = "",
     /** A computer-readable indicator for the state of this card’s image, one of missing, placeholder, lowres, or highres_scan. */
     @Json(name = "image_status") val imageStatus: ImageStatus = ImageStatus.Missing,
     /** An object listing available imagery for this card. See the Card Imagery article for more information. */
@@ -255,7 +255,7 @@ data class Card(
     /** Whether this card is a variation of another printing. */
     @Json(name = "variation") val variation: Boolean = false,
     /** The printing ID of the printing this card is a variation of. */
-    @Json(name = "variation_of") val variationOf: Long? = null,
+    @Json(name = "variation_of") val variationOf: String? = null,
     /** This card’s watermark, if any. */
     @Json(name = "watermark") val watermark: String? = null,
     /** The date this card was previewed. */
@@ -271,7 +271,7 @@ data class Card(
 @JsonClass(generateAdapter = true)
 data class RelatedCard(
     /** An unique ID for this card in Scryfall’s database. */
-    @Json(name = "id") val id: Long = -1L,
+    @Json(name = "id") val id: String = "",
     /** A field explaining what role this card plays in this relationship, one of token, meld_part, meld_result, or combo_piece. */
     @Json(name = "component") val component: Component = Component.Token,
     /** The name of this particular related card. */
@@ -294,7 +294,7 @@ data class CardFace(
     /** The flavor text printed on this face, if any. */
     @Json(name = "flavor_text") val flavorText: String? = null,
     /** A unique identifier for the card face artwork that remains consistent across reprints. Newly spoiled cards may not have this field yet. */
-    @Json(name = "illustration_id") val illustrationId: Long? = null,
+    @Json(name = "illustration_id") val illustrationId: String? = null,
     /** An object providing URIs to imagery for this face, if this is a double-sided card. If this card is not double-sided, then the image_uris property will be part of the parent object instead. */
     @Json(name = "image_uris") val imageUris: ImageUris? = null,
     /** This face’s loyalty, if any. */
