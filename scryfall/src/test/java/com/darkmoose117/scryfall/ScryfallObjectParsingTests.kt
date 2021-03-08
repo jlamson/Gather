@@ -60,4 +60,14 @@ class ScryfallObjectParsingTests {
         assertNotNull(allSets?.data?.find { it.code.equals("khm", ignoreCase = true) })
     }
 
+    @Test
+    fun `should not crash on any rulings`() {
+        val jsonAsString = loadFileIntoString("cma_176_rulings.json")
+
+        val responseType = Types.newParameterizedType(DataList::class.java, Ruling::class.java)
+        val adapter: JsonAdapter<DataList<Ruling>> = moshi.adapter(responseType)
+        val rulings = adapter.fromJson(jsonAsString)
+
+        assertEquals(3, rulings?.data?.size)
+    }
 }
