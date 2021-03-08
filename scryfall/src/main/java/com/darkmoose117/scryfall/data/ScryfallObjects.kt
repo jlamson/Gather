@@ -330,11 +330,11 @@ data class CardFace(
 @JsonClass(generateAdapter = true)
 data class Ruling(
     /** A computer-readable string indicating which company produced this ruling, either wotc or scryfall. */
-    @Json(name = "source") val source: String,
+    @Json(name = "source") val source: String = "",
     /** The date when the ruling or note was published. */
-    @Json(name = "published_at") val publishedAt: String,
+    @Json(name = "published_at") val publishedAt: String = "",
     /** The text of the ruling. */
-    @Json(name = "comment") val comment: String,
+    @Json(name = "comment") val comment: String = "",
 ) : ScryfallObject(ObjectType.RulingObject)
 
 // endregion
@@ -361,11 +361,11 @@ data class CardSymbol(
     /** True if this symbol is only used on funny cards or Un-cards. */
     @Json(name = "funny") val funny: Boolean = false,
     /** An array of colors that this symbol represents. */
-    @Json(name = "colors") val colors: Set<Color>,
+    @Json(name = "colors") val colors: Set<Color> = emptySet(),
     /** An array of plaintext versions of this symbol that Gatherer uses on old cards to describe original printed text. For example: {W} has ["oW", "ooW"] as alternates. */
     @Json(name = "gatherer_alternates") val gathererAlternates: List<String>? = null,
     /** A URI to an SVG image of this symbol on Scryfall’s CDNs. */
-    @Json(name = "svg_uri") val svgUri: String?,
+    @Json(name = "svg_uri") val svgUri: String? = null,
 ) : ScryfallObject(ObjectType.CardSymbolObject)
 
 // endregion
@@ -375,11 +375,11 @@ data class CardSymbol(
 @JsonClass(generateAdapter = true)
 data class Catalog(
     /** A link to the current catalog on Scryfall’s API. */
-    @Json(name = "uri") val uri: String,
+    @Json(name = "uri") val uri: String = "",
     /** The number of items in the data array. */
-    @Json(name = "total_values") val total_values: Int,
+    @Json(name = "total_values") val total_values: Int = 0,
     /** An array of datapoints, as strings. */
-    @Json(name = "data") val data: List<String>,
+    @Json(name = "data") val data: List<String> = emptyList(),
 ) : ScryfallObject(ObjectType.CatalogObject)
 
 // endregion
