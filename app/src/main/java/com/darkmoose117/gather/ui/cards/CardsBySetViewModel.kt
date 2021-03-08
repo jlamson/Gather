@@ -6,8 +6,8 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.darkmoose117.gather.util.CoroutineContextProvider
-import io.magicthegathering.kotlinsdk.api.MtgCardApiClient
-import io.magicthegathering.kotlinsdk.model.card.MtgCard
+import com.darkmoose117.scryfall.ScryfallApi
+import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -22,8 +22,10 @@ class CardsBySetViewModel : ViewModel() {
     private val _viewState = MutableLiveData<CardsBySetViewState>(CardsBySetViewState.Loading)
     val viewState = Transformations.distinctUntilChanged(_viewState)
 
+    private val cardsApi = ScryfallApi.cardsApi
+
     private var sortedBy = CardsSortedBy.Number
-    private var loadedCards: List<MtgCard>? = null
+    private var loadedCards: List<Card>? = null
 
     fun loadCards(setCode: String?) {
         if (setCode == null) {
@@ -33,15 +35,15 @@ class CardsBySetViewModel : ViewModel() {
 
         _viewState.postValue(CardsBySetViewState.Loading)
         viewModelScope.launch(contextProvider.IO) {
-            val response = MtgCardApiClient.getAllCardsBySetCode(setCode, pageSize = 1000)
+            val response = cardsApi.getCardsBySearch(query = "e:$setCode", order = "set", pretty = true)
             if (response.isSuccessful) {
-                val cards = response.body()
-                if (cards != null) {
+                val cards = response.body()?.data
+                if (!cards.isNullOrEmpty()) {
                     loadedCards = cards
 
                     updateList()
                 } else {
-                    _viewState.postValue(CardsBySetViewState.Failure(Throwable("No sets returned")))
+                    _viewState.postValue(CardsBySetViewState.Failure(Throwable("No cards returned")))
                 }
             } else {
                 _viewState.postValue(CardsBySetViewState.Failure(Throwable("Fetch to load sets failed: ${response.code()}")))
@@ -69,8 +71,8 @@ class CardsBySetViewModel : ViewModel() {
         )
     }
 
-    private fun List<MtgCard>.sortedWith(sort: CardsSortedBy): List<MtgCard> = when (sort) {
-        CardsSortedBy.Number -> this.sortedBy { it.number!!.toInt() }
+    private fun List<Card>.sortedWith(sort: CardsSortedBy): List<Card> = when (sort) {
+        CardsSortedBy.Number -> this.sortedBy { it.collectorNumber.toInt() }
         CardsSortedBy.Name -> this.sortedBy { it.name }
     }
 }
@@ -79,7 +81,7 @@ class CardsBySetViewModel : ViewModel() {
 sealed class CardsBySetViewState {
     object Loading : CardsBySetViewState()
     data class Success(
-        val cards: List<MtgCard>,
+        val cards: List<Card>,
         val cardsSortedBy: CardsSortedBy
     ) : CardsBySetViewState()
     class Failure(

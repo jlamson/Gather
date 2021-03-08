@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -34,8 +33,7 @@ import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
 import com.darkmoose117.gather.util.bottomBarPadding
 import com.darkmoose117.gather.util.placeForFab
-import dev.chrisbanes.accompanist.insets.navigationBarsPadding
-import io.magicthegathering.kotlinsdk.model.card.MtgCard
+import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -67,7 +65,7 @@ fun CardsByViewScreen(
 @ExperimentalAnimationApi
 @Composable
 fun CardList(
-    cards: List<MtgCard>,
+    cards: List<Card>,
     cardsSortedBy: CardsSortedBy,
     onToggleSort: () -> Unit
 ) {
@@ -104,7 +102,7 @@ fun CardList(
         sheetPeekHeight = 0.dp,
     ) {
         ScrollToTopLazyColumn {
-            items(cards, { card: MtgCard -> card.id!! }) { card ->
+            items(cards, { card: Card -> card.id }) { card ->
                 CardListItem(card = card, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
             }
         }

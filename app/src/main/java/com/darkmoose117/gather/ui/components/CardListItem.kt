@@ -1,8 +1,6 @@
 package com.darkmoose117.gather.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,22 +11,17 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.darkmoose117.gather.util.ARCHANGEL_AVACYN
 import com.darkmoose117.gather.util.ThemedPreview
-import com.darkmoose117.gather.util.onLongPress
-import io.magicthegathering.kotlinsdk.model.card.MtgCard
+import com.darkmoose117.scryfall.data.Card
+import com.darkmoose117.scryfall.preview.SpecificCards
 
 @ExperimentalAnimationApi
 @Composable
-fun CardListItem(card: MtgCard, modifier: Modifier = Modifier) {
+fun CardListItem(card: Card, modifier: Modifier = Modifier) {
     Card(modifier, elevation = 2.dp) {
         Column(Modifier.padding(8.dp)) {
             Row(Modifier.fillMaxWidth()) {
@@ -39,15 +32,15 @@ fun CardListItem(card: MtgCard, modifier: Modifier = Modifier) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = card.manaCost,
+                    text = card.manaCost ?: "(none)",
                     modifier = Modifier.alignByBaseline(),
                     style = MaterialTheme.typography.body1
                 )
             }
 
-            Text(text = card.type, style = MaterialTheme.typography.subtitle2)
+            Text(text = card.typeLine, style = MaterialTheme.typography.subtitle2)
 
-            card.text?.let {
+            card.oracleText?.let {
                 Text(text = it, style = MaterialTheme.typography.body1)
             }
 
@@ -75,6 +68,6 @@ fun CardListItem(card: MtgCard, modifier: Modifier = Modifier) {
 @Composable
 fun CardListItemPreview() {
     ThemedPreview {
-        CardListItem(card = ARCHANGEL_AVACYN, Modifier.padding(16.dp))
+        CardListItem(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
     }
 }

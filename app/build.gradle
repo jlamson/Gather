@@ -69,8 +69,6 @@ dependencies {
 //    implementation "org.koin:koin-android:2.1.6"
 //    implementation "org.koin:koin-androidx-viewmodel:2.1.6"
 
-    // TODO ditch this API
-    implementation "io.magicthegathering:kotlinsdk:1.0.4"
     implementation project(":scryfall")
 
     implementation "com.github.bumptech.glide:glide:4.11.0"
