@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.theme.GatherTheme
-import dev.chrisbanes.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.navigationBarsPadding
 
 @Composable
 fun GatherBottomBar(

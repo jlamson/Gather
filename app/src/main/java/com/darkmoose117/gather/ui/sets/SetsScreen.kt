@@ -136,7 +136,7 @@ fun SetList(
                     SetGroupHeader(groupLabel)
                 }
 
-                items(sets, { it.code }) { set ->
+                items(items = sets, key = { it.code }) { set ->
                     SetItem(set, modifier = Modifier.clickable(onClick = { onSetClicked(set.code) }))
                 }
             }
@@ -342,13 +342,13 @@ fun LightSetsScreen() {
     ThemedPreview { SetsScreen(testState, {}, {}, {}, {}) }
 }
 
-//@ExperimentalMaterialApi
-//@ExperimentalAnimationApi
-//@ExperimentalFoundationApi
-//@Preview(widthDp = 360, heightDp = 480, showBackground = true)
-//@Composable
-//fun DarkSetsScreen() {
-//    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}, {}, {}) }
-//}
+@ExperimentalMaterialApi
+@ExperimentalAnimationApi
+@ExperimentalFoundationApi
+@Preview(widthDp = 360, heightDp = 480, showBackground = true)
+@Composable
+fun DarkSetsScreen() {
+    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}, {}, {}) }
+}
 
 // endregion

@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.navigationBarsPadding
 
 fun Modifier.onLongPress(onLongPress: (Offset) -> Unit) = this.pointerInput(Unit) {
     detectTapGestures(onLongPress = onLongPress)

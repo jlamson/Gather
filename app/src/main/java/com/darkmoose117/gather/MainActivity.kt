@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -16,18 +15,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.darkmoose117.gather.databinding.ContentMainBinding
 import com.darkmoose117.gather.ui.components.GatherAppBar
 import com.darkmoose117.gather.ui.components.GatherBottomBar
 import com.darkmoose117.gather.ui.components.Tab
 import com.darkmoose117.gather.ui.theme.GatherTheme
-import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
-import dev.chrisbanes.accompanist.insets.navigationBarsPadding
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity() {
 
