@@ -1,4 +1,4 @@
-package com.darkmoose117.scryfall.api
+package com.darkmoose117.scryfall.api.sets
 
 import com.darkmoose117.scryfall.data.DataList
 import com.darkmoose117.scryfall.data.MagicSet

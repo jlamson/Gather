@@ -44,7 +44,7 @@ class CardsBySetFragment : Fragment() {
             .start(windowInsetsAnimationsEnabled = true)
 
         setContent {
-            val viewState by viewModel.viewState.observeAsState(CardsBySetViewState.Loading)
+            val viewState by viewModel.viewState.observeAsState(CardListViewState.Loading)
             CompositionLocalProvider(LocalWindowInsets provides windowInsets) {
                 GatherTheme {
                     CardListScreen(

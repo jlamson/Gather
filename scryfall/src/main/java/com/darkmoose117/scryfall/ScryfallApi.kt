@@ -1,7 +1,7 @@
 package com.darkmoose117.scryfall
 
-import com.darkmoose117.scryfall.api.ScryfallCardsApi
-import com.darkmoose117.scryfall.api.ScryfallSetsApi
+import com.darkmoose117.scryfall.api.cards.ScryfallCardsApi
+import com.darkmoose117.scryfall.api.sets.ScryfallSetsApi
 import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

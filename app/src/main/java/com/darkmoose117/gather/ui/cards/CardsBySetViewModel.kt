@@ -1,12 +1,12 @@
 package com.darkmoose117.gather.ui.cards
 
-import androidx.compose.runtime.Immutable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.darkmoose117.gather.util.CoroutineContextProvider
 import com.darkmoose117.scryfall.ScryfallApi
+import com.darkmoose117.scryfall.api.params.Order
 import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -16,10 +16,10 @@ class CardsBySetViewModel : ViewModel() {
 
     private val contextProvider = CoroutineContextProvider(handler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable)
-        _viewState.postValue(CardsBySetViewState.Failure(throwable))
+        _viewState.postValue(CardListViewState.Failure(throwable))
     })
 
-    private val _viewState = MutableLiveData<CardsBySetViewState>(CardsBySetViewState.Loading)
+    private val _viewState = MutableLiveData<CardListViewState>(CardListViewState.Loading)
     val viewState = Transformations.distinctUntilChanged(_viewState)
 
     private val cardsApi = ScryfallApi.cardsApi
@@ -30,13 +30,13 @@ class CardsBySetViewModel : ViewModel() {
 
     fun loadCards(setCode: String?) {
         if (setCode == null) {
-            _viewState.postValue(CardsBySetViewState.Failure(IllegalArgumentException("SetCode not defined")))
+            _viewState.postValue(CardListViewState.Failure(IllegalArgumentException("SetCode not defined")))
             return
         }
 
-        _viewState.postValue(CardsBySetViewState.Loading)
+        _viewState.postValue(CardListViewState.Loading)
         viewModelScope.launch(contextProvider.IO) {
-            val response = cardsApi.getCardsBySearch(query = "e:$setCode", order = "set", pretty = true)
+            val response = cardsApi.getCardsBySearch(query = "e:$setCode", order = Order.SET, pretty = true)
             if (response.isSuccessful) {
                 val cards = response.body()?.data
                 if (!cards.isNullOrEmpty()) {
@@ -44,10 +44,10 @@ class CardsBySetViewModel : ViewModel() {
 
                     updateList()
                 } else {
-                    _viewState.postValue(CardsBySetViewState.Failure(Throwable("No cards returned")))
+                    _viewState.postValue(CardListViewState.Failure(Throwable("No cards returned")))
                 }
             } else {
-                _viewState.postValue(CardsBySetViewState.Failure(Throwable("Fetch to load sets failed: ${response.code()}")))
+                _viewState.postValue(CardListViewState.Failure(Throwable("Fetch to load sets failed: ${response.code()}")))
             }
         }
     }
@@ -74,7 +74,7 @@ class CardsBySetViewModel : ViewModel() {
         val safeCards = loadedCards ?: return
         val safeSort = sortedBy
         _viewState.postValue(
-            CardsBySetViewState.Success(
+            CardListViewState.Success(
                 safeCards.sortedWith(safeSort),
                 safeSort,
                 cardsViewType
@@ -86,27 +86,4 @@ class CardsBySetViewModel : ViewModel() {
         CardsSortedBy.Number -> this.sortedBy { it.collectorNumber.toInt() }
         CardsSortedBy.Name -> this.sortedBy { it.name }
     }
-}
-
-@Immutable
-sealed class CardsBySetViewState {
-    object Loading : CardsBySetViewState()
-    data class Success(
-        val cards: List<Card>,
-        val cardsSortedBy: CardsSortedBy,
-        val cardsViewType: CardsViewType
-    ) : CardsBySetViewState()
-    class Failure(
-        val throwable: Throwable
-    ) : CardsBySetViewState()
-}
-
-@Immutable
-enum class CardsSortedBy {
-    Number, Name
-}
-
-@Immutable
-enum class CardsViewType {
-    Text, Image
 }

@@ -10,7 +10,7 @@ import com.darkmoose117.gather.ui.sets.SetsViewState.Loading
 import com.darkmoose117.gather.ui.sets.SetsViewState.Success
 import com.darkmoose117.gather.util.CoroutineContextProvider
 import com.darkmoose117.scryfall.ScryfallApi
-import com.darkmoose117.scryfall.api.ScryfallSetsApi
+import com.darkmoose117.scryfall.api.sets.ScryfallSetsApi
 import com.darkmoose117.scryfall.data.MagicSet
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch

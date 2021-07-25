@@ -45,7 +45,6 @@ import com.darkmoose117.gather.ui.components.CardImageListItem
 import com.darkmoose117.gather.ui.components.CardTextListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.LoadingCard
-import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
 import com.darkmoose117.gather.util.bottomBarPadding
 import com.darkmoose117.gather.util.placeForFab
 import com.darkmoose117.scryfall.data.Card
@@ -58,7 +57,7 @@ import kotlin.math.roundToInt
 @ExperimentalMaterialApi
 @Composable
 fun CardListScreen(
-    viewState: CardsBySetViewState,
+    viewState: CardListViewState,
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit,
     modifier: Modifier = Modifier
@@ -69,9 +68,9 @@ fun CardListScreen(
             contentColor = MaterialTheme.colors.onSurface
         ) {
             when (viewState) {
-                is CardsBySetViewState.Loading -> LoadingCard()
-                is CardsBySetViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is CardsBySetViewState.Success -> CardList(viewState.cards, viewState.cardsSortedBy, viewState.cardsViewType, onToggleSort, onToggleViewType)
+                is CardListViewState.Loading -> LoadingCard()
+                is CardListViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
+                is CardListViewState.Success -> CardList(viewState.cards, viewState.cardsSortedBy, viewState.cardsViewType, onToggleSort, onToggleViewType)
             }
         }
     }
