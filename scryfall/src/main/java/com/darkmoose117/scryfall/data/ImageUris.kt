@@ -36,3 +36,14 @@ data class ImageUris(
      */
     @Json(name = "small") val small: String? = null,
 )
+
+sealed class ImageUriSize(val width: Int, val height: Int) {
+
+    val ratio: Float = width.toFloat() / height.toFloat()
+
+    object Png : ImageUriSize(745, 1040)
+    object BorderCrop : ImageUriSize(480, 680)
+    object Large : ImageUriSize(672, 936)
+    object Normal : ImageUriSize(488, 680)
+    object Small : ImageUriSize(146, 204)
+}

@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.BottomSheetScaffold
@@ -27,7 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.darkmoose117.gather.R
-import com.darkmoose117.gather.ui.components.CardListItem
+import com.darkmoose117.gather.ui.components.CardImageListItem
+import com.darkmoose117.gather.ui.components.CardTextListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
@@ -44,6 +47,7 @@ import kotlinx.coroutines.launch
 fun CardsByViewScreen(
     viewState: CardsBySetViewState,
     onToggleSort: () -> Unit,
+    onToggleViewType: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -54,7 +58,7 @@ fun CardsByViewScreen(
             when (viewState) {
                 is CardsBySetViewState.Loading -> LoadingCard()
                 is CardsBySetViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is CardsBySetViewState.Success -> CardList(viewState.cards, viewState.cardsSortedBy, onToggleSort)
+                is CardsBySetViewState.Success -> CardList(viewState.cards, viewState.cardsSortedBy, viewState.cardsViewType, onToggleSort, onToggleViewType)
             }
         }
     }
@@ -67,7 +71,9 @@ fun CardsByViewScreen(
 fun CardList(
     cards: List<Card>,
     cardsSortedBy: CardsSortedBy,
-    onToggleSort: () -> Unit
+    cardsViewType: CardsViewType,
+    onToggleSort: () -> Unit,
+    onToggleViewType: () -> Unit
 ) {
     val scaffoldState = rememberBottomSheetScaffoldState()
     val scope = rememberCoroutineScope()
@@ -96,14 +102,23 @@ fun CardList(
         sheetContent = {
             CardSortFilterBottomSheet(
                 sortedBy = cardsSortedBy,
-                onToggleSort = onToggleSort
+                cardsViewType = cardsViewType,
+                onToggleSort = onToggleSort,
+                onToggleViewType = onToggleViewType
             )
         },
         sheetPeekHeight = 0.dp,
     ) {
         ScrollToTopLazyColumn {
             items(cards, { card: Card -> card.id }) { card ->
-                CardListItem(card = card, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
+                if (cardsViewType == CardsViewType.Text) {
+                    CardTextListItem(
+                        card = card,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                    )
+                } else if (cardsViewType == CardsViewType.Image) {
+                    CardImageListItem(card = card, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
+                }
             }
         }
     }
@@ -112,7 +127,9 @@ fun CardList(
 @Composable
 fun ColumnScope.CardSortFilterBottomSheet(
     sortedBy: CardsSortedBy,
-    onToggleSort: () -> Unit
+    cardsViewType: CardsViewType,
+    onToggleSort: () -> Unit,
+    onToggleViewType: () -> Unit
 ) {
     Row(
         modifier = Modifier.padding(all = 16.dp),
@@ -131,6 +148,26 @@ fun ColumnScope.CardSortFilterBottomSheet(
             enabled = sortedBy != CardsSortedBy.Number
         ) {
             Text(text = "Sort by Number")
+        }
+    }
+    Spacer(modifier = Modifier.height(4.dp))
+    Row(
+        modifier = Modifier.padding(all = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.Start)
+    ) {
+        Button(
+            modifier = Modifier.weight(1f),
+            onClick = onToggleViewType,
+            enabled = cardsViewType != CardsViewType.Image
+        ) {
+            Text(text = "View Images")
+        }
+        Button(
+            modifier = Modifier.weight(1f),
+            onClick = onToggleViewType,
+            enabled = cardsViewType != CardsViewType.Text
+        ) {
+            Text(text = "View Text")
         }
     }
 }

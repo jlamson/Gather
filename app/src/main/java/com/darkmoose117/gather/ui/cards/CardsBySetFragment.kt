@@ -49,7 +49,8 @@ class CardsBySetFragment : Fragment() {
                 GatherTheme {
                     CardsByViewScreen(
                         viewState,
-                        onToggleSort = { viewModel.toggleSort() }
+                        onToggleSort = { viewModel.toggleSort() },
+                        onToggleViewType = { viewModel.toggleViewType() }
                     )
                 }
             }

@@ -25,6 +25,7 @@ class CardsBySetViewModel : ViewModel() {
     private val cardsApi = ScryfallApi.cardsApi
 
     private var sortedBy = CardsSortedBy.Number
+    private var cardsViewType = CardsViewType.Image
     private var loadedCards: List<Card>? = null
 
     fun loadCards(setCode: String?) {
@@ -60,13 +61,23 @@ class CardsBySetViewModel : ViewModel() {
         updateList()
     }
 
+    fun toggleViewType() {
+        cardsViewType = when (cardsViewType) {
+            CardsViewType.Image -> CardsViewType.Text
+            CardsViewType.Text -> CardsViewType.Image
+        }
+
+        updateList()
+    }
+
     private fun updateList() {
         val safeCards = loadedCards ?: return
         val safeSort = sortedBy
         _viewState.postValue(
             CardsBySetViewState.Success(
                 safeCards.sortedWith(safeSort),
-                safeSort
+                safeSort,
+                cardsViewType
             )
         )
     }
@@ -82,7 +93,8 @@ sealed class CardsBySetViewState {
     object Loading : CardsBySetViewState()
     data class Success(
         val cards: List<Card>,
-        val cardsSortedBy: CardsSortedBy
+        val cardsSortedBy: CardsSortedBy,
+        val cardsViewType: CardsViewType
     ) : CardsBySetViewState()
     class Failure(
         val throwable: Throwable
@@ -92,4 +104,9 @@ sealed class CardsBySetViewState {
 @Immutable
 enum class CardsSortedBy {
     Number, Name
+}
+
+@Immutable
+enum class CardsViewType {
+    Text, Image
 }

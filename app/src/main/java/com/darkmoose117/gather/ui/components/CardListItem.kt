@@ -1,33 +1,44 @@
 package com.darkmoose117.gather.ui.components
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.darkmoose117.gather.util.ThemedPreview
 import com.darkmoose117.scryfall.data.Card
+import com.darkmoose117.scryfall.data.ImageUriSize
+import com.darkmoose117.scryfall.data.ImageUris
 import com.darkmoose117.scryfall.preview.SpecificCards
+import timber.log.Timber
 
 @ExperimentalAnimationApi
 @Composable
-fun CardListItem(card: Card, modifier: Modifier = Modifier) {
+fun CardTextListItem(card: Card, modifier: Modifier = Modifier) {
     Card(modifier, elevation = 2.dp) {
         Column(Modifier.padding(8.dp)) {
             Row(Modifier.fillMaxWidth()) {
                 Text(
                     text = card.name,
-                    modifier = Modifier.weight(1f).alignByBaseline(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .alignByBaseline(),
                     style = MaterialTheme.typography.h6
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -64,10 +75,32 @@ fun CardListItem(card: Card, modifier: Modifier = Modifier) {
 }
 
 @ExperimentalAnimationApi
+@Composable
+fun CardImageListItem(card: Card, modifier: Modifier = Modifier) {
+    // This is a pretty cool effect. this is white. n
+    Card(modifier, elevation = 2.dp) {
+        Image(
+            painter = rememberImagePainter(card.imageUris?.png.also { Timber.tag("JOSHUA").d(it) }),
+            contentDescription = card.name,
+            modifier = Modifier.fillMaxWidth(1f).aspectRatio(ImageUriSize.Png.ratio)
+        )
+    }
+}
+
+@ExperimentalAnimationApi
 @Preview(widthDp = 360)
 @Composable
 fun CardListItemPreview() {
     ThemedPreview {
-        CardListItem(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
+        CardTextListItem(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
+    }
+}
+
+@ExperimentalAnimationApi
+@Preview(widthDp = 360)
+@Composable
+fun CardImageItemPreview() {
+    ThemedPreview {
+        CardImageListItem(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
     }
 }
