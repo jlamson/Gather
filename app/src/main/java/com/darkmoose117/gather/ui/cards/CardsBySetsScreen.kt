@@ -1,15 +1,22 @@
 package com.darkmoose117.gather.ui.cards
 
+import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Button
@@ -23,9 +30,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.darkmoose117.gather.R
@@ -39,12 +51,13 @@ import com.darkmoose117.gather.util.placeForFab
 import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @Composable
-fun CardsByViewScreen(
+fun CardListScreen(
     viewState: CardsBySetViewState,
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit,
@@ -96,7 +109,7 @@ fun CardList(
                 onClick = toggleBottomSheet,
                 modifier = Modifier.placeForFab()
             ) {
-                Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.toggle_sort))
+                Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.filter_sort_fab))
             }
         },
         sheetContent = {
@@ -109,15 +122,34 @@ fun CardList(
         },
         sheetPeekHeight = 0.dp,
     ) {
-        ScrollToTopLazyColumn {
-            items(cards, { card: Card -> card.id }) { card ->
-                if (cardsViewType == CardsViewType.Text) {
-                    CardTextListItem(
-                        card = card,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                    )
-                } else if (cardsViewType == CardsViewType.Image) {
-                    CardImageListItem(card = card, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
+        var scale by remember { mutableStateOf(1f) }
+        var cells by remember { mutableStateOf(GridCells.Fixed(scale.roundToInt())) }
+        val columnMax = when (LocalConfiguration.current.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> 5f
+            else -> 3f
+        }
+        val state = rememberTransformableState { zoomChange, _/*panChange*/, _/*rotationChange*/ ->
+            scale = (scale * (1 / zoomChange)).coerceIn(1f, columnMax)
+            cells = GridCells.Fixed(scale.roundToInt())
+        }
+        Box(
+            modifier = Modifier.transformable(state = state)
+        ) {
+            val itemSpacing = when (cells.count) {
+                1 -> 16.dp
+                2 -> 8.dp
+                else -> 4.dp
+            }
+            LazyVerticalGrid(
+                cells = cells,
+                contentPadding = PaddingValues(top = itemSpacing, start = itemSpacing)
+            ) {
+                items(cards) { card ->
+                    val itemMod = Modifier.padding(bottom = itemSpacing, end = itemSpacing)
+                    when (cardsViewType) {
+                        CardsViewType.Text -> CardTextListItem(card = card, modifier = itemMod)
+                        CardsViewType.Image -> CardImageListItem(card = card, modifier = itemMod)
+                    }
                 }
             }
         }

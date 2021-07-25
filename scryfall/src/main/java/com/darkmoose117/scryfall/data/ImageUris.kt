@@ -3,6 +3,11 @@ package com.darkmoose117.scryfall.data
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+/**
+ * An object holding all available image URIs for this card.
+ *
+ * @see ImageUriSize
+ */
 @JsonClass(generateAdapter = true)
 data class ImageUris(
     /** A transparent, rounded full card PNG. This is the best image to use for videos or other high-quality content.
@@ -35,8 +40,24 @@ data class ImageUris(
      * * Type: JPG
      */
     @Json(name = "small") val small: String? = null,
-)
+) {
+    /**
+     * return the member corresponding to the [size] provided. Example [ImageUris.png] for [ImageUriSize.Png]
+     */
+    fun forSize(size: ImageUriSize) = when (size) {
+        ImageUriSize.Png -> this.png
+        ImageUriSize.BorderCrop -> this.borderCrop
+        ImageUriSize.Large -> this.large
+        ImageUriSize.Normal -> this.normal
+        ImageUriSize.Small -> this.small
+    }
+}
 
+/**
+ * A simple helper to describe the size of images returned by various [ImageUriSize]s.
+ *
+ * @
+ */
 sealed class ImageUriSize(val width: Int, val height: Int) {
 
     val ratio: Float = width.toFloat() / height.toFloat()
@@ -46,4 +67,16 @@ sealed class ImageUriSize(val width: Int, val height: Int) {
     object Large : ImageUriSize(672, 936)
     object Normal : ImageUriSize(488, 680)
     object Small : ImageUriSize(146, 204)
+
+    companion object {
+        private val bigToSmall by lazy {
+            listOf(Png, BorderCrop, Large, Normal, Small).sortedByDescending(ImageUriSize::width)
+        }
+
+        /**
+         * Returns one of [Png], [Large], [Normal], [Small] where the width of the image will fill
+         * the provided [width]. If
+         */
+        fun largestForWidth(viewWidth: Int) = bigToSmall.firstOrNull { it.width >= viewWidth } ?: Png
+    }
 }

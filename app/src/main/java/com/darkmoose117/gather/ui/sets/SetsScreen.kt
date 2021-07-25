@@ -110,7 +110,7 @@ fun SetList(
                 onClick = toggleBottomSheet,
                 modifier = Modifier.placeForFab()
             ) {
-                Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.toggle_sort))
+                Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.filter_sort_fab))
             }
         },
         sheetContent = {

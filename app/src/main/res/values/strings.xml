@@ -3,7 +3,7 @@
     <string name="back">Back</string>
     <string name="loading">Loading…</string>
 
-    <string name="toggle_sort">Toggle the sort between alphabetical and by date</string>
+    <string name="filter_sort_fab">Reveal a menu to sort/filter the list</string>
     <string name="scroll_to_stop">Scroll to top</string>
 
     <string name="generic_error">Oops, something went wrong. Check your internet and try again.</string>

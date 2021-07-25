@@ -47,7 +47,7 @@ class CardsBySetFragment : Fragment() {
             val viewState by viewModel.viewState.observeAsState(CardsBySetViewState.Loading)
             CompositionLocalProvider(LocalWindowInsets provides windowInsets) {
                 GatherTheme {
-                    CardsByViewScreen(
+                    CardListScreen(
                         viewState,
                         onToggleSort = { viewModel.toggleSort() },
                         onToggleViewType = { viewModel.toggleViewType() }
