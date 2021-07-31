@@ -14,15 +14,28 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.HasDefaultViewModelProviderFactory
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.darkmoose117.gather.ui.theme.GatherTheme
 import com.google.accompanist.insets.ExperimentalAnimatedInsets
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.ViewWindowInsetObserver
+import java.lang.IllegalArgumentException
 
 @ExperimentalAnimatedInsets
 class CardsBySetFragment : Fragment() {
 
-    private val viewModel: CardsBySetViewModel by viewModels()
+    private val viewModel: CardsBySetViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(CardsBySetViewModel::class.java)) {
+                    return CardsBySetViewModel(arguments!!.getString("setCode")!!) as T
+                } else throw IllegalArgumentException("Invalid modelClass: $modelClass")
+            }
+        }
+    }
 
     @ExperimentalMaterialApi
     @ExperimentalAnimationApi
@@ -44,10 +57,12 @@ class CardsBySetFragment : Fragment() {
             .start(windowInsetsAnimationsEnabled = true)
 
         setContent {
-            val viewState by viewModel.viewState.observeAsState(CardListViewState.Loading)
+            val viewState by viewModel.viewState.observeAsState(viewModel.buildViewState())
+            val lazyCardList = viewModel.cardsPager.flow.collectAsLazyPagingItems()
             CompositionLocalProvider(LocalWindowInsets provides windowInsets) {
                 GatherTheme {
                     CardListScreen(
+                        lazyCardList,
                         viewState,
                         onToggleSort = { viewModel.toggleSort() },
                         onToggleViewType = { viewModel.toggleViewType() }
@@ -55,11 +70,5 @@ class CardsBySetFragment : Fragment() {
                 }
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        viewModel.loadCards(arguments?.getString("setCode"))
     }
 }

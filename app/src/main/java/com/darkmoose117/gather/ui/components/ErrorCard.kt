@@ -23,13 +23,13 @@ import com.darkmoose117.gather.R
 import com.darkmoose117.gather.util.ThemedPreview
 
 @Composable
-fun ErrorCard(@StringRes errorMessage: Int = R.string.generic_error) = ErrorCard(
-    stringResource(id = errorMessage)
+fun ErrorCard(modifier: Modifier = Modifier, @StringRes errorMessage: Int = R.string.generic_error) = ErrorCard(
+    stringResource(id = errorMessage, modifier)
 )
 
 @Composable
-fun ErrorCard(errorMessage: String) {
-    Box(Modifier.padding(vertical = 32.dp, horizontal = 16.dp)) {
+fun ErrorCard(errorMessage: String, modifier: Modifier = Modifier) {
+    Box(modifier.padding(vertical = 32.dp, horizontal = 16.dp)) {
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,

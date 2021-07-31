@@ -42,4 +42,8 @@ interface ScryfallCardsApi {
         @Query("pretty") pretty: Boolean? = null
     ) : Response<DataList<Card>>
 
+    companion object {
+        const val PAGE_SIZE = 175
+    }
+
 }

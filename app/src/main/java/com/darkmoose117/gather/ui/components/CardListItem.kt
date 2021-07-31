@@ -25,12 +25,22 @@ import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
+import com.darkmoose117.gather.ui.cards.CardsViewType
 import com.darkmoose117.gather.util.ThemedPreview
 import com.darkmoose117.scryfall.data.Card
 import com.darkmoose117.scryfall.data.ImageUriSize
 import com.darkmoose117.scryfall.data.ImageUris
 import com.darkmoose117.scryfall.preview.SpecificCards
 import timber.log.Timber
+
+@ExperimentalAnimationApi
+@Composable
+fun CardListItem(card: Card, viewType: CardsViewType, modifier: Modifier = Modifier) {
+    when (viewType) {
+        CardsViewType.Text -> CardTextListItem(card = card, modifier = modifier)
+        CardsViewType.Image -> CardImageListItem(card = card, modifier = modifier)
+    }
+}
 
 @ExperimentalAnimationApi
 @Composable
@@ -83,7 +93,9 @@ fun CardImageListItem(card: Card, modifier: Modifier = Modifier) {
         Image(
             painter = rememberImagePainter(card.imageUris?.forSize(imageSize)),
             contentDescription = card.name,
-            modifier = Modifier.fillMaxWidth(1f).aspectRatio(imageSize.ratio)
+            modifier = Modifier
+                .fillMaxWidth(1f)
+                .aspectRatio(imageSize.ratio)
         )
     }
 }

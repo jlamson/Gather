@@ -3,53 +3,37 @@ package com.darkmoose117.gather.ui.cards
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import com.darkmoose117.gather.data.cards.PagedCardSource
 import com.darkmoose117.gather.util.CoroutineContextProvider
 import com.darkmoose117.scryfall.ScryfallApi
+import com.darkmoose117.scryfall.api.cards.ScryfallCardsApi
 import com.darkmoose117.scryfall.api.params.Order
 import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class CardsBySetViewModel : ViewModel() {
-
-    private val contextProvider = CoroutineContextProvider(handler = CoroutineExceptionHandler { _, throwable ->
-        Timber.e(throwable)
-        _viewState.postValue(CardListViewState.Failure(throwable))
-    })
-
-    private val _viewState = MutableLiveData<CardListViewState>(CardListViewState.Loading)
-    val viewState = Transformations.distinctUntilChanged(_viewState)
-
-    private val cardsApi = ScryfallApi.cardsApi
+class CardsBySetViewModel(
+    private val setCode: String
+) : ViewModel() {
 
     private var sortedBy = CardsSortedBy.Number
     private var cardsViewType = CardsViewType.Image
-    private var loadedCards: List<Card>? = null
 
-    fun loadCards(setCode: String?) {
-        if (setCode == null) {
-            _viewState.postValue(CardListViewState.Failure(IllegalArgumentException("SetCode not defined")))
-            return
-        }
+    private val _viewState = MutableLiveData(buildViewState())
+    val viewState = Transformations.distinctUntilChanged(_viewState)
 
-        _viewState.postValue(CardListViewState.Loading)
-        viewModelScope.launch(contextProvider.IO) {
-            val response = cardsApi.getCardsBySearch(query = "e:$setCode", order = Order.SET, pretty = true)
-            if (response.isSuccessful) {
-                val cards = response.body()?.data
-                if (!cards.isNullOrEmpty()) {
-                    loadedCards = cards
-
-                    updateList()
-                } else {
-                    _viewState.postValue(CardListViewState.Failure(Throwable("No cards returned")))
-                }
-            } else {
-                _viewState.postValue(CardListViewState.Failure(Throwable("Fetch to load sets failed: ${response.code()}")))
-            }
-        }
+    private lateinit var pagedCardSource: PagedCardSource
+    val cardsPager = Pager(
+        PagingConfig(
+            pageSize = ScryfallCardsApi.PAGE_SIZE,
+            prefetchDistance = 50,
+            enablePlaceholders = false,
+            initialLoadSize = ScryfallCardsApi.PAGE_SIZE,
+        )
+    ) {
+        buildPagerSource()
     }
 
     fun toggleSort() {
@@ -58,7 +42,8 @@ class CardsBySetViewModel : ViewModel() {
             CardsSortedBy.Number -> CardsSortedBy.Name
         }
 
-        updateList()
+        pagedCardSource.invalidate()
+        updateViewState()
     }
 
     fun toggleViewType() {
@@ -67,23 +52,16 @@ class CardsBySetViewModel : ViewModel() {
             CardsViewType.Text -> CardsViewType.Image
         }
 
-        updateList()
+        updateViewState()
     }
 
-    private fun updateList() {
-        val safeCards = loadedCards ?: return
-        val safeSort = sortedBy
-        _viewState.postValue(
-            CardListViewState.Success(
-                safeCards.sortedWith(safeSort),
-                safeSort,
-                cardsViewType
-            )
-        )
-    }
+    fun buildViewState() = CardListViewState(sortedBy, cardsViewType)
 
-    private fun List<Card>.sortedWith(sort: CardsSortedBy): List<Card> = when (sort) {
-        CardsSortedBy.Number -> this.sortedBy { it.collectorNumber.toInt() }
-        CardsSortedBy.Name -> this.sortedBy { it.name }
-    }
+    private fun updateViewState() { _viewState.postValue(buildViewState()) }
+
+    private fun buildPagerSource() = PagedCardSource(
+        api = ScryfallApi.cardsApi,
+        query = "e:$setCode",
+        order = sortedBy.order()
+    ).also { pagedCardSource = it }
 }

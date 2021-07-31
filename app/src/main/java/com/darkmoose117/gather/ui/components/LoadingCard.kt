@@ -20,8 +20,8 @@ import com.darkmoose117.gather.R
 import com.darkmoose117.gather.util.ThemedPreview
 
 @Composable
-fun LoadingCard() {
-    Box(Modifier.padding(vertical = 32.dp, horizontal = 16.dp)) {
+fun LoadingCard(modifier: Modifier = Modifier) {
+    Box(modifier.padding(vertical = 32.dp, horizontal = 16.dp)) {
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,

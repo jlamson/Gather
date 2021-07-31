@@ -1,24 +1,27 @@
 package com.darkmoose117.gather.ui.cards
 
 import androidx.compose.runtime.Immutable
+import com.darkmoose117.scryfall.api.params.Order
+import com.darkmoose117.scryfall.api.params.OrderString
 import com.darkmoose117.scryfall.data.Card
 
 @Immutable
-sealed class CardListViewState {
-    object Loading : CardListViewState()
-    data class Success(
-        val cards: List<Card>,
-        val cardsSortedBy: CardsSortedBy,
-        val cardsViewType: CardsViewType
-    ) : CardListViewState()
-    class Failure(
-        val throwable: Throwable
-    ) : CardListViewState()
-}
+data class CardListViewState(
+    val cardsSortedBy: CardsSortedBy,
+    val cardsViewType: CardsViewType
+)
 
 @Immutable
 enum class CardsSortedBy {
-    Number, Name
+    Number {
+        override fun order() = Order.SET
+    },
+    Name {
+        override fun order() = Order.NAME
+    };
+
+    @OrderString
+    abstract fun order(): String
 }
 
 @Immutable

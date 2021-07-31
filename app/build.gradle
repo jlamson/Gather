@@ -65,6 +65,9 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
     implementation "androidx.navigation:navigation-ui-ktx:2.3.5"
 
+    implementation "androidx.paging:paging-runtime-ktx:3.0.1"
+    implementation "androidx.paging:paging-compose:1.0.0-alpha12"
+
 //    implementation "org.koin:koin-core:2.1.6"
 //    implementation "org.koin:koin-android:2.1.6"
 //    implementation "org.koin:koin-androidx-viewmodel:2.1.6"

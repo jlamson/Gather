@@ -15,11 +15,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -40,9 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import com.darkmoose117.gather.R
-import com.darkmoose117.gather.ui.components.CardImageListItem
-import com.darkmoose117.gather.ui.components.CardTextListItem
+import com.darkmoose117.gather.ui.components.CardListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.util.bottomBarPadding
@@ -57,6 +59,7 @@ import kotlin.math.roundToInt
 @ExperimentalMaterialApi
 @Composable
 fun CardListScreen(
+    cardList: LazyPagingItems<Card>,
     viewState: CardListViewState,
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit,
@@ -67,11 +70,7 @@ fun CardListScreen(
             color = MaterialTheme.colors.surface,
             contentColor = MaterialTheme.colors.onSurface
         ) {
-            when (viewState) {
-                is CardListViewState.Loading -> LoadingCard()
-                is CardListViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is CardListViewState.Success -> CardList(viewState.cards, viewState.cardsSortedBy, viewState.cardsViewType, onToggleSort, onToggleViewType)
-            }
+            CardList(cardList, viewState, onToggleSort, onToggleViewType)
         }
     }
 }
@@ -81,9 +80,8 @@ fun CardListScreen(
 @ExperimentalAnimationApi
 @Composable
 fun CardList(
-    cards: List<Card>,
-    cardsSortedBy: CardsSortedBy,
-    cardsViewType: CardsViewType,
+    lazyCards: LazyPagingItems<Card>,
+    viewState: CardListViewState,
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit
 ) {
@@ -113,8 +111,8 @@ fun CardList(
         },
         sheetContent = {
             CardSortFilterBottomSheet(
-                sortedBy = cardsSortedBy,
-                cardsViewType = cardsViewType,
+                sortedBy = viewState.cardsSortedBy,
+                cardsViewType = viewState.cardsViewType,
                 onToggleSort = onToggleSort,
                 onToggleViewType = onToggleViewType
             )
@@ -143,11 +141,45 @@ fun CardList(
                 cells = cells,
                 contentPadding = PaddingValues(top = itemSpacing, start = itemSpacing)
             ) {
-                items(cards) { card ->
-                    val itemMod = Modifier.padding(bottom = itemSpacing, end = itemSpacing)
-                    when (cardsViewType) {
-                        CardsViewType.Text -> CardTextListItem(card = card, modifier = itemMod)
-                        CardsViewType.Image -> CardImageListItem(card = card, modifier = itemMod)
+                items(count = lazyCards.itemCount) { index ->
+                    CardListItem(
+                        card = lazyCards[index]!!,
+                        viewType = viewState.cardsViewType,
+                        modifier = Modifier.padding(bottom = itemSpacing, end = itemSpacing)
+                    )
+                }
+
+                lazyCards.apply {
+                    when {
+                        loadState.refresh is LoadState.Loading -> {
+                            item {
+                                LoadingCard(modifier = Modifier.fillParentMaxSize())
+                            }
+                        }
+                        loadState.append is LoadState.Loading -> {
+                            item {
+                                CircularProgressIndicator(
+                                    Modifier.size(48.dp).align(Alignment.Center)
+                                )
+                            }
+                        }
+                        loadState.refresh is LoadState.Error -> {
+                            val e = loadState.refresh as LoadState.Error
+                            item {
+                                ErrorCard(
+                                    modifier = Modifier.fillParentMaxSize(),
+                                    errorMessage = e.error.localizedMessage!!
+                                )
+                            }
+                        }
+                        loadState.append is LoadState.Error -> {
+                            val e = loadState.append as LoadState.Error
+                            item {
+                                ErrorCard(
+                                    errorMessage = e.error.localizedMessage!!
+                                )
+                            }
+                        }
                     }
                 }
             }
