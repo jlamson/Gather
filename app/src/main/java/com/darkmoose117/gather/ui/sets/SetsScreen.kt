@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,22 +43,39 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.ErrorCard
+import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
 import com.darkmoose117.gather.ui.components.StaggeredGrid
+import com.darkmoose117.gather.ui.nav.Nav
 import com.darkmoose117.gather.util.ThemedPreview
-import com.darkmoose117.gather.util.placeForFab
 import com.darkmoose117.scryfall.data.MagicSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@ExperimentalMaterialApi
-@ExperimentalFoundationApi
-@ExperimentalAnimationApi
 @Composable
 fun SetsScreen(
+    navController: NavController
+) {
+    val viewModel: SetsViewModel = viewModel()
+    val viewState by viewModel.viewState.observeAsState(initial = SetsViewState.Loading)
+    SetsContent(
+        viewState = viewState,
+        onSetClicked = { setCode ->
+            navController.navigate(Nav.Dest.CardList.routeForSet(setCode))
+        },
+        onToggleSort = { viewModel.toggleSort() },
+        onToggleAllTypes = { viewModel.toggleAllTypes() },
+        onToggleType = { type -> viewModel.toggleType(type) }
+    )
+}
+
+@Composable
+fun SetsContent(
     viewState: SetsViewState,
     onSetClicked: (String) -> Unit,
     onToggleSort: () -> Unit,
@@ -79,9 +97,7 @@ fun SetsScreen(
     }
 }
 
-@ExperimentalMaterialApi
-@ExperimentalFoundationApi
-@ExperimentalAnimationApi
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SetList(
     state: SetsViewState.Success,
@@ -90,29 +106,7 @@ fun SetList(
     onToggleAllTypes: () -> Unit,
     onToggleType: (String) -> Unit
 ) {
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val scope = rememberCoroutineScope()
-
-    val toggleBottomSheet: () -> Unit = {
-        scope.launch(Dispatchers.Main) {
-            if (scaffoldState.bottomSheetState.isExpanded) {
-                scaffoldState.bottomSheetState.collapse()
-            } else {
-                scaffoldState.bottomSheetState.expand()
-            }
-        }
-    }
-
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = toggleBottomSheet,
-                modifier = Modifier.placeForFab()
-            ) {
-                Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.filter_sort_fab))
-            }
-        },
+    FabRevealedBottomSheetScaffold(
         sheetContent = {
             SetSortFilterBottomSheet(
                 state = state,
@@ -120,8 +114,7 @@ fun SetList(
                 onToggleAllTypes = onToggleAllTypes,
                 onToggleType = onToggleType
             )
-        },
-        sheetPeekHeight = 0.dp,
+        }
     ) {
         ScrollToTopLazyColumn {
             val grouped: Map<String, List<MagicSet>> = when (state.setsSortedBy) {
@@ -339,7 +332,7 @@ fun BottomSheet() {
 @Preview(widthDp = 360, heightDp = 480, showBackground = true)
 @Composable
 fun LightSetsScreen() {
-    ThemedPreview { SetsScreen(testState, {}, {}, {}, {}) }
+    ThemedPreview { SetsContent(testState, {}, {}, {}, {}) }
 }
 
 @ExperimentalMaterialApi
@@ -348,7 +341,7 @@ fun LightSetsScreen() {
 @Preview(widthDp = 360, heightDp = 480, showBackground = true)
 @Composable
 fun DarkSetsScreen() {
-    ThemedPreview(darkTheme = true) { SetsScreen(testState, {}, {}, {}, {}) }
+    ThemedPreview(darkTheme = true) { SetsContent(testState, {}, {}, {}, {}) }
 }
 
 // endregion

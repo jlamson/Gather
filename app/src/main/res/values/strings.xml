@@ -7,4 +7,7 @@
     <string name="scroll_to_stop">Scroll to top</string>
 
     <string name="generic_error">Oops, something went wrong. Check your internet and try again.</string>
+
+    <string name="sets">Sets</string>
+    <string name="search">Search</string>
 </resources>

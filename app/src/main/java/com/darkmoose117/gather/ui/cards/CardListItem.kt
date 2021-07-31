@@ -4,24 +4,16 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
@@ -29,22 +21,18 @@ import com.darkmoose117.gather.ui.cards.CardsViewType
 import com.darkmoose117.gather.util.ThemedPreview
 import com.darkmoose117.scryfall.data.Card
 import com.darkmoose117.scryfall.data.ImageUriSize
-import com.darkmoose117.scryfall.data.ImageUris
 import com.darkmoose117.scryfall.preview.SpecificCards
-import timber.log.Timber
 
-@ExperimentalAnimationApi
 @Composable
 fun CardListItem(card: Card, viewType: CardsViewType, modifier: Modifier = Modifier) {
     when (viewType) {
-        CardsViewType.Text -> CardTextListItem(card = card, modifier = modifier)
-        CardsViewType.Image -> CardImageListItem(card = card, modifier = modifier)
+        CardsViewType.Text -> CardText(card = card, modifier = modifier)
+        CardsViewType.Image -> CardImage(card = card, modifier = modifier)
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
-fun CardTextListItem(card: Card, modifier: Modifier = Modifier) {
+fun CardText(card: Card, modifier: Modifier = Modifier) {
     Card(modifier, elevation = 2.dp) {
         Column(Modifier.padding(8.dp)) {
             Text(
@@ -84,9 +72,8 @@ fun CardTextListItem(card: Card, modifier: Modifier = Modifier) {
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
-fun CardImageListItem(card: Card, modifier: Modifier = Modifier) {
+fun CardImage(card: Card, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier = modifier) {
         val widthInPx = LocalDensity.current.run { maxWidth.toPx().toInt() }
         val imageSize = ImageUriSize.largestForWidth(widthInPx)
@@ -105,7 +92,7 @@ fun CardImageListItem(card: Card, modifier: Modifier = Modifier) {
 @Composable
 fun CardListItemPreview() {
     ThemedPreview {
-        CardTextListItem(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
+        CardText(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
     }
 }
 
@@ -114,6 +101,6 @@ fun CardListItemPreview() {
 @Composable
 fun CardImageItemPreview() {
     ThemedPreview {
-        CardImageListItem(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
+        CardImage(card = SpecificCards.AvacynArchangel, Modifier.padding(16.dp))
     }
 }

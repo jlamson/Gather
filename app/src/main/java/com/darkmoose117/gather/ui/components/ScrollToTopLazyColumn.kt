@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.darkmoose117.gather.R
 import kotlinx.coroutines.launch
 
-@ExperimentalAnimationApi
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ScrollToTopLazyColumn(
     content: LazyListScope.() -> Unit

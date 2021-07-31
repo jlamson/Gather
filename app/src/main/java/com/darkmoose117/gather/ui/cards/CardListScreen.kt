@@ -1,7 +1,6 @@
 package com.darkmoose117.gather.ui.cards
 
 import android.content.res.Configuration
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
@@ -32,6 +31,7 @@ import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,24 +41,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.CardListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
+import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
 import com.darkmoose117.gather.ui.components.LoadingCard
-import com.darkmoose117.gather.util.bottomBarPadding
-import com.darkmoose117.gather.util.placeForFab
 import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@ExperimentalAnimationApi
-@ExperimentalFoundationApi
-@ExperimentalMaterialApi
 @Composable
 fun CardListScreen(
+    navController: NavController,
+    query: String
+) {
+    val viewModel: CardListViewModel = viewModel(factory = object : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(CardListViewModel::class.java)) {
+                return CardListViewModel(query) as T
+            } else throw IllegalArgumentException("Invalid modelClass $modelClass")
+        }
+    })
+
+    val lazyCardList = viewModel.cardsPager.flow.collectAsLazyPagingItems()
+    val viewState by viewModel.viewState.observeAsState(viewModel.buildViewState())
+
+    CardListContent(
+        cardList = lazyCardList,
+        viewState = viewState,
+        onToggleSort = { viewModel.toggleSort() },
+        onToggleViewType = { viewModel.toggleViewType() })
+}
+
+@Composable
+fun CardListContent(
     cardList: LazyPagingItems<Card>,
     viewState: CardListViewState,
     onToggleSort: () -> Unit,
@@ -75,9 +99,10 @@ fun CardListScreen(
     }
 }
 
-@ExperimentalMaterialApi
-@ExperimentalFoundationApi
-@ExperimentalAnimationApi
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 fun CardList(
     lazyCards: LazyPagingItems<Card>,
@@ -85,30 +110,7 @@ fun CardList(
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit
 ) {
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val scope = rememberCoroutineScope()
-
-    val toggleBottomSheet: () -> Unit = {
-        scope.launch(Dispatchers.Main) {
-            if (scaffoldState.bottomSheetState.isExpanded) {
-                scaffoldState.bottomSheetState.collapse()
-            } else {
-                scaffoldState.bottomSheetState.expand()
-            }
-        }
-    }
-
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        modifier = Modifier.bottomBarPadding(),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = toggleBottomSheet,
-                modifier = Modifier.placeForFab()
-            ) {
-                Icon(Icons.Outlined.Sort, contentDescription = stringResource(R.string.filter_sort_fab))
-            }
-        },
+    FabRevealedBottomSheetScaffold(
         sheetContent = {
             CardSortFilterBottomSheet(
                 sortedBy = viewState.cardsSortedBy,
@@ -116,8 +118,7 @@ fun CardList(
                 onToggleSort = onToggleSort,
                 onToggleViewType = onToggleViewType
             )
-        },
-        sheetPeekHeight = 0.dp,
+        }
     ) {
         var scale by remember { mutableStateOf(1f) }
         var cells by remember { mutableStateOf(GridCells.Fixed(scale.roundToInt())) }
@@ -159,7 +160,9 @@ fun CardList(
                         loadState.append is LoadState.Loading -> {
                             item {
                                 CircularProgressIndicator(
-                                    Modifier.size(48.dp).align(Alignment.Center)
+                                    Modifier
+                                        .size(48.dp)
+                                        .align(Alignment.Center)
                                 )
                             }
                         }

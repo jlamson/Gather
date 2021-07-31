@@ -18,24 +18,29 @@ import timber.log.Timber
 
 class SetsViewModel : ViewModel() {
 
-    private val contextProvider = CoroutineContextProvider(handler = CoroutineExceptionHandler { _, throwable ->
-        Timber.e(throwable)
-        _viewState.postValue(Failure(throwable))
-    })
-
-    private val _viewState = MutableLiveData<SetsViewState>(Loading)
-    val viewState = Transformations.distinctUntilChanged(_viewState)
-
     private var sortedBy = SetsSortedBy.Date
     private var loadedSets: List<MagicSet>? = null
     private var typeFilters: MutableMap<String, Boolean> = mutableMapOf()
     private var typeCount: Map<String, Int> = mapOf()
 
-    // TODO INJECT
+    // TODO Inject
     private val setsApi: ScryfallSetsApi = ScryfallApi.setsApi
 
-    fun loadSets() {
-        _viewState.postValue(Loading)
+    private val contextProvider = CoroutineContextProvider(handler = CoroutineExceptionHandler { _, throwable ->
+        Timber.e(throwable)
+        _viewState.postValue(Failure(throwable))
+    })
+
+    private val _viewState by lazy {
+        MutableLiveData<SetsViewState>(Loading).also {
+            loadSets()
+        }
+    }
+    val viewState by lazy {
+        Transformations.distinctUntilChanged(_viewState)
+    }
+
+    private fun loadSets() {
         viewModelScope.launch(contextProvider.IO) {
             val response = setsApi.getAllSets()
             if (response.isSuccessful) {

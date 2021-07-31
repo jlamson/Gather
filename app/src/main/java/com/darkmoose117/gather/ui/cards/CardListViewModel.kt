@@ -14,15 +14,15 @@ import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.CoroutineExceptionHandler
 import timber.log.Timber
 
-class CardsBySetViewModel(
-    private val setCode: String
+class CardListViewModel(
+    private val query: String
 ) : ViewModel() {
 
     private var sortedBy = CardsSortedBy.Number
     private var cardsViewType = CardsViewType.Image
 
-    private val _viewState = MutableLiveData(buildViewState())
-    val viewState = Transformations.distinctUntilChanged(_viewState)
+    private val _viewState by lazy { MutableLiveData(buildViewState()) }
+    val viewState by lazy { Transformations.distinctUntilChanged(_viewState) }
 
     private lateinit var pagedCardSource: PagedCardSource
     val cardsPager = Pager(
@@ -61,7 +61,7 @@ class CardsBySetViewModel(
 
     private fun buildPagerSource() = PagedCardSource(
         api = ScryfallApi.cardsApi,
-        query = "e:$setCode",
+        query = query,
         order = sortedBy.order()
     ).also { pagedCardSource = it }
 }
