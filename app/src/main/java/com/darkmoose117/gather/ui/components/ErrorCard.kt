@@ -24,7 +24,8 @@ import com.darkmoose117.gather.util.ThemedPreview
 
 @Composable
 fun ErrorCard(modifier: Modifier = Modifier, @StringRes errorMessage: Int = R.string.generic_error) = ErrorCard(
-    stringResource(id = errorMessage, modifier)
+    stringResource(id = errorMessage),
+    modifier
 )
 
 @Composable

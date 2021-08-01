@@ -2,6 +2,9 @@ package com.darkmoose117.gather.data.cards
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.darkmoose117.gather.util.Result
+import com.darkmoose117.gather.util.Result.Failure
+import com.darkmoose117.gather.util.Result.Success
 import com.darkmoose117.scryfall.api.params.OrderString
 import com.darkmoose117.scryfall.data.Card
 
@@ -20,9 +23,9 @@ class PagedCardSource(
             order = order,
             page = nextPageNumber
         )
-        when {
-            result.isSuccess -> {
-                val dataList = result.getOrThrow()
+        when (result) {
+            is Success -> {
+                val dataList = result.value
                 val nextKeyMaybe = if (!dataList.nextPage.isNullOrBlank()) {
                     nextPageNumber + 1
                 } else null
@@ -33,10 +36,9 @@ class PagedCardSource(
                     nextKey = nextKeyMaybe
                 )
             }
-            result.isFailure -> {
-                LoadResult.Error(result.exceptionOrNull()!!)
+            is Failure -> {
+                LoadResult.Error(result.expectedErrorOrNull()!!)
             }
-            else -> throw IllegalStateException("$result")
         }
     } catch (e: Exception) {
         LoadResult.Error(e)

@@ -1,5 +1,6 @@
 package com.darkmoose117.gather.data.cards
 
+import com.darkmoose117.gather.util.Result
 import com.darkmoose117.scryfall.api.cards.ScryfallCardsApi
 import com.darkmoose117.scryfall.api.params.OrderString
 import com.darkmoose117.scryfall.data.Card
@@ -7,6 +8,7 @@ import com.darkmoose117.scryfall.data.DataList
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import retrofit2.HttpException
+import timber.log.Timber
 
 class CardRepository(
     private val api: ScryfallCardsApi,
@@ -38,28 +40,29 @@ class CardRepository(
             lastQuery = query
             response.body()?.let { safeBody ->
                 safeBody.data.forEach { cardIdMap[it.id] = it }
-                Result.success(safeBody)
-            } ?: Result.failure(NoCardsFoundError(query))
+                Result.Success(safeBody)
+            } ?: Result.Failure(NoCardsFoundError(query))
         } else {
-            Result.failure(HttpException(response))
+            Result.Failure(HttpException(response))
         }
     }
 
-    suspend fun getCardsById(
+    suspend fun getCardById(
         id: String,
         forceReload: Boolean = false
     ): Result<Card> = apiMutex.withLock {
         if (!forceReload && cardIdMap.containsKey(id)) {
-            return Result.success(cardIdMap[id]!!)
+            return Result.Success(cardIdMap[id]!!)
         }
 
         val response = api.getCardById(id)
         return if (response.isSuccessful) {
             response.body()?.let { safeBody ->
-                Result.success(safeBody)
-            } ?: Result.failure(HttpException(response))
+                Timber.d("safeBody: $safeBody")
+                Result.Success(safeBody)
+            } ?: Result.Failure(HttpException(response))
         } else {
-            Result.failure(HttpException(response))
+            Result.Failure(HttpException(response))
         }
     }
 }

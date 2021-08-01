@@ -2,8 +2,10 @@ package com.darkmoose117.gather.ui.cards
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -63,6 +66,7 @@ import com.darkmoose117.gather.ui.components.HomeNavigationIcon
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.NavigateUpIcon
 import com.darkmoose117.gather.ui.components.TopAppBarWithBottomContent
+import com.darkmoose117.gather.ui.nav.Nav
 import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,8 +93,10 @@ fun CardListScreen(
         cardList = lazyCardList,
         viewState = viewState,
         navigateUp = { navController.popBackStack() },
+        onCardTapped = { card -> navController.navigate(Nav.Dest.CardDetail.route(card.id)) },
         onToggleSort = { viewModel.toggleSort() },
-        onToggleViewType = { viewModel.toggleViewType() })
+        onToggleViewType = { viewModel.toggleViewType() }
+    )
 }
 
 @Composable
@@ -98,6 +104,7 @@ fun CardListContent(
     cardList: LazyPagingItems<Card>,
     viewState: CardListViewState,
     navigateUp: () -> Unit,
+    onCardTapped: (Card) -> Unit,
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit,
     modifier: Modifier = Modifier
@@ -108,7 +115,7 @@ fun CardListContent(
             navigationIcon = { NavigateUpIcon(navigateUp) }
         )
 
-        CardList(cardList, viewState, onToggleSort, onToggleViewType)
+        CardList(cardList, viewState, onCardTapped, onToggleSort, onToggleViewType)
     }
 }
 
@@ -120,6 +127,7 @@ fun CardListContent(
 fun CardList(
     lazyCards: LazyPagingItems<Card>,
     viewState: CardListViewState,
+    onCardTapped: (Card) -> Unit,
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit
 ) {
@@ -148,10 +156,17 @@ fun CardList(
 
         PinchToZoomLazyGrid(viewType = viewState.cardsViewType) { itemSpacing ->
             items(count = lazyCards.itemCount) { index ->
+                val card = lazyCards[index]!!
                 CardListItem(
-                    card = lazyCards[index]!!,
+                    card = card,
                     viewType = viewState.cardsViewType,
-                    modifier = Modifier.padding(bottom = itemSpacing, end = itemSpacing)
+                    modifier = Modifier
+                        .clickable(
+                            indication = rememberRipple(),
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = { onCardTapped(card) },
+                        )
+                        .padding(bottom = itemSpacing, end = itemSpacing)
                 )
             }
 

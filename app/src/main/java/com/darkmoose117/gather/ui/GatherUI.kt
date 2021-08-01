@@ -1,16 +1,15 @@
 package com.darkmoose117.gather.ui
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.darkmoose117.gather.data.cards.CardRepository
+import com.darkmoose117.gather.ui.cards.CardDetailScreen
 import com.darkmoose117.gather.ui.cards.CardListScreen
 import com.darkmoose117.gather.ui.nav.GatherBottomBar
 import com.darkmoose117.gather.ui.nav.Nav
@@ -43,6 +42,13 @@ fun GatherUI() {
                         navController = navController,
                         repository = cardRepository,
                         query = backStackEntry.arguments?.getString(Nav.Args.QUERY)!!
+                    )
+                }
+                composable(Dest.CardDetail.route) { backStackEntry ->
+                    CardDetailScreen(
+                        navController = navController,
+                        repository = cardRepository,
+                        id = backStackEntry.arguments?.getString(Nav.Args.ID)!!
                     )
                 }
             }
