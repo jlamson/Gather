@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -23,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,7 +33,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -63,32 +65,41 @@ fun SearchScreen(
 
     var searchBarInput by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        TopAppBarWithBottomContent(
-            title = { Text(stringResource(id = R.string.search)) },
-            navigationIcon = { HomeNavigationIcon() },
-            bottomContent = {
-                SearchBar(::submitQuery, searchBarInput) { searchBarInput = it }
-            }
-        )
-
-        AndroidView(factory = ::WebView) { webView ->
-            webView.settings.javaScriptEnabled = true
-            webView.webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                    val httpUrl = url?.toHttpUrlOrNull() ?: return false
-                    if (httpUrl.host == "scryfall.com") {
-                        val query = httpUrl.queryParameter("q")
-                        if (httpUrl.pathSegments[0] == "search" && !query.isNullOrBlank()) {
-                            searchBarInput = query
-                        } else {
-                            context.openUrlDialog(httpUrl.toString())
-                        }
-                    }
-                    return true
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = modifier.fillMaxSize()) {
+            TopAppBarWithBottomContent(
+                title = { Text(stringResource(id = R.string.search)) },
+                navigationIcon = { HomeNavigationIcon() },
+                bottomContent = {
+                    SearchBar(::submitQuery, searchBarInput) { searchBarInput = it }
                 }
+            )
+
+            AndroidView(factory = ::WebView) { webView ->
+                webView.settings.javaScriptEnabled = true
+                webView.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                        val httpUrl = url?.toHttpUrlOrNull() ?: return false
+                        if (httpUrl.host == "scryfall.com") {
+                            val query = httpUrl.queryParameter("q")
+                            if (httpUrl.pathSegments[0] == "search" && !query.isNullOrBlank()) {
+                                searchBarInput = query
+                            } else {
+                                context.openUrlDialog(httpUrl.toString())
+                            }
+                        }
+                        return true
+                    }
+                }
+                webView.loadUrl("https://scryfall.com/docs/syntax")
             }
-            webView.loadUrl("https://scryfall.com/docs/syntax")
+        }
+
+        FloatingActionButton(
+            onClick = { submitQuery(searchBarInput) },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+        ) {
+            Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.search))
         }
     }
 }
