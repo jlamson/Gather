@@ -1,4 +1,4 @@
-package com.darkmoose117.gather.ui.components
+package com.darkmoose117.gather.ui.cards
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,8 +16,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
-import com.darkmoose117.gather.ui.cards.CardsViewType
-import com.darkmoose117.gather.ui.cards.SymbolText
 import com.darkmoose117.gather.util.ThemedPreview
 import com.darkmoose117.scryfall.data.Card
 import com.darkmoose117.scryfall.data.ImageUriSize

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -22,12 +21,10 @@ import com.darkmoose117.gather.data.cards.CardRepository
 import com.darkmoose117.gather.ui.cards.CardDetailViewState.Failure
 import com.darkmoose117.gather.ui.cards.CardDetailViewState.Loading
 import com.darkmoose117.gather.ui.cards.CardDetailViewState.Success
-import com.darkmoose117.gather.ui.components.CardText
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.LoadingCard
 import com.darkmoose117.gather.ui.components.NavigateUpIcon
 import com.darkmoose117.scryfall.data.Card
-import timber.log.Timber
 
 @Composable
 fun CardDetailScreen(
