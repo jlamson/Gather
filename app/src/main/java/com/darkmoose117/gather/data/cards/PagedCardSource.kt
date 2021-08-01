@@ -2,40 +2,44 @@ package com.darkmoose117.gather.data.cards
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.darkmoose117.scryfall.api.cards.ScryfallCardsApi
 import com.darkmoose117.scryfall.api.params.OrderString
 import com.darkmoose117.scryfall.data.Card
 
 class PagedCardSource(
-    private val api: ScryfallCardsApi,
+    private val repository: CardRepository,
     private val query: String,
     @OrderString
     private var order: String? = null
 ) : PagingSource<Int, Card>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Card> {
-        try {
-            // Start refresh at page 1 if undefined.
-            val nextPageNumber = params.key ?: 1
-            val response = api.getCardsBySearch(
-                query = query,
-                order = order,
-                page = nextPageNumber
-            )
-            val body = response.body()
-            val cardList = body?.data ?: emptyList()
-            val nextKeyMaybe = if (!body?.nextPage.isNullOrBlank()) {
-                nextPageNumber + 1
-            } else null
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Card> = try {
+        // Start refresh at page 1 if undefined.
+        val nextPageNumber = params.key ?: 1
+        val result = repository.getCardsBySearch(
+            query = query,
+            order = order,
+            page = nextPageNumber
+        )
+        when {
+            result.isSuccess -> {
+                val dataList = result.getOrThrow()
+                val nextKeyMaybe = if (!dataList.nextPage.isNullOrBlank()) {
+                    nextPageNumber + 1
+                } else null
 
-            return LoadResult.Page(
-                data = cardList,
-                prevKey = null, // Only paging forward.
-                nextKey = nextKeyMaybe
-            )
-        } catch (e: Exception) {
-            return LoadResult.Error(e)
+                LoadResult.Page(
+                    data = dataList.data,
+                    prevKey = null, // Only paging forward.
+                    nextKey = nextKeyMaybe
+                )
+            }
+            result.isFailure -> {
+                LoadResult.Error(result.exceptionOrNull()!!)
+            }
+            else -> throw IllegalStateException("$result")
         }
+    } catch (e: Exception) {
+        LoadResult.Error(e)
     }
 
     override fun getRefreshKey(state: PagingState<Int, Card>): Int? {

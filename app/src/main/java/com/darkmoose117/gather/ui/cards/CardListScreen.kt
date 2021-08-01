@@ -55,6 +55,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.darkmoose117.gather.R
+import com.darkmoose117.gather.data.cards.CardRepository
 import com.darkmoose117.gather.ui.components.CardListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
@@ -70,12 +71,13 @@ import kotlin.math.roundToInt
 @Composable
 fun CardListScreen(
     navController: NavController,
+    repository: CardRepository,
     query: String
 ) {
     val viewModel: CardListViewModel = viewModel(factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(CardListViewModel::class.java)) {
-                return CardListViewModel(query) as T
+                return CardListViewModel(query, repository) as T
             } else throw IllegalArgumentException("Invalid modelClass $modelClass")
         }
     })

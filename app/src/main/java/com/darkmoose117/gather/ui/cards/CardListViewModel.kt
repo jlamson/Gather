@@ -5,6 +5,7 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import com.darkmoose117.gather.data.cards.CardRepository
 import com.darkmoose117.gather.data.cards.PagedCardSource
 import com.darkmoose117.gather.util.CoroutineContextProvider
 import com.darkmoose117.scryfall.ScryfallApi
@@ -15,7 +16,8 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import timber.log.Timber
 
 class CardListViewModel(
-    private val query: String
+    private val query: String,
+    private val repository: CardRepository
 ) : ViewModel() {
 
     private var sortedBy = CardsSortedBy.Number
@@ -60,7 +62,7 @@ class CardListViewModel(
     private fun updateViewState() { _viewState.postValue(buildViewState()) }
 
     private fun buildPagerSource() = PagedCardSource(
-        api = ScryfallApi.cardsApi,
+        repository = repository,
         query = query,
         order = sortedBy.order()
     ).also { pagedCardSource = it }

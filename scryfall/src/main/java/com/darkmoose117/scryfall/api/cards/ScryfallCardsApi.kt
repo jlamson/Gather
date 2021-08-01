@@ -27,6 +27,8 @@ interface ScryfallCardsApi {
      * @param page The page number to return, default 1.
      * @param format The data format to return: json or csv. Defaults to json. see [Format]
      * @param pretty If true, the returned JSON will be prettified. Avoid using for production code.
+     *
+     * @author [Scryfall Docs](https://scryfall.com/docs/api/cards/search)
      */
     @GET("cards/search")
     suspend fun getCardsBySearch(
@@ -41,6 +43,24 @@ interface ScryfallCardsApi {
         @Query("format") @FormatString format: String? = null,
         @Query("pretty") pretty: Boolean? = null
     ) : Response<DataList<Card>>
+
+    /**
+     * @param id The Scryfall ID.
+     * @param format The data format to return: json, text, or image. Defaults to json.
+     * @param face If using the image format and this parameter has the value back, the back face of the card will be returned. Will return a 422 if this card has no back face.
+     * @param version The image version to return when using the image format: small, normal, large, png, art_crop, or border_crop. Defaults to large.
+     * @param pretty If true, the returned JSON will be prettified. Avoid using for production code.
+     *
+     * @author [Scryfall Docs](https://scryfall.com/docs/api/cards/id)
+     */
+    @GET("cards/{id}")
+    suspend fun getCardById(
+        @Query("id") id: String,
+        @Query("format") format: String? = null,
+        @Query("face") face: String? = null,
+        @Query("version") version: String? = null,
+        @Query("pretty") pretty: Boolean? = null,
+    ) : Response<Card>
 
     companion object {
         const val PAGE_SIZE = 175
