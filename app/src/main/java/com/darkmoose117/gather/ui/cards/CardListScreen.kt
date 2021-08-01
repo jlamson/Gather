@@ -28,6 +28,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -49,6 +50,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -56,7 +58,10 @@ import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.CardListItem
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
+import com.darkmoose117.gather.ui.components.HomeNavigationIcon
 import com.darkmoose117.gather.ui.components.LoadingCard
+import com.darkmoose117.gather.ui.components.NavigateUpIcon
+import com.darkmoose117.gather.ui.components.TopAppBarWithBottomContent
 import com.darkmoose117.scryfall.data.Card
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,6 +86,7 @@ fun CardListScreen(
     CardListContent(
         cardList = lazyCardList,
         viewState = viewState,
+        navigateUp = { navController.popBackStack() },
         onToggleSort = { viewModel.toggleSort() },
         onToggleViewType = { viewModel.toggleViewType() })
 }
@@ -89,17 +95,18 @@ fun CardListScreen(
 fun CardListContent(
     cardList: LazyPagingItems<Card>,
     viewState: CardListViewState,
+    navigateUp: () -> Unit,
     onToggleSort: () -> Unit,
     onToggleViewType: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Surface(
-            color = MaterialTheme.colors.surface,
-            contentColor = MaterialTheme.colors.onSurface
-        ) {
-            CardList(cardList, viewState, onToggleSort, onToggleViewType)
-        }
+        TopAppBar(
+            title = { Text(viewState.query) },
+            navigationIcon = { NavigateUpIcon(navigateUp) }
+        )
+
+        CardList(cardList, viewState, onToggleSort, onToggleViewType)
     }
 }
 

@@ -7,6 +7,7 @@ import com.darkmoose117.scryfall.data.Card
 
 @Immutable
 data class CardListViewState(
+    val query: String,
     val cardsSortedBy: CardsSortedBy,
     val cardsViewType: CardsViewType
 )

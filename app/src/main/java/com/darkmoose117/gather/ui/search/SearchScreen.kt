@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.darkmoose117.gather.R
+import com.darkmoose117.gather.ui.components.HomeNavigationIcon
+import com.darkmoose117.gather.ui.components.TopAppBarWithBottomContent
 import com.darkmoose117.gather.util.ThemedPreview
 
 
@@ -20,12 +25,12 @@ fun SearchScreen(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Surface(
-            color = MaterialTheme.colors.surface,
-            contentColor = MaterialTheme.colors.onSurface
-        ) {
-            Text("Search", style = MaterialTheme.typography.h1)
-        }
+        TopAppBar(
+            title = { Text(stringResource(id = R.string.search)) },
+            navigationIcon = { HomeNavigationIcon() }
+        )
+
+        Text("Search", style = MaterialTheme.typography.h1)
     }
 }
 

@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 fun FabRevealedBottomSheetScaffold(
     modifier: Modifier = Modifier,
     scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState(),
+    topBar: @Composable (() -> Unit)? = null,
     sheetContent: @Composable ColumnScope.() -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -43,6 +44,7 @@ fun FabRevealedBottomSheetScaffold(
 
     BottomSheetScaffold(
         modifier = modifier,
+        topBar = topBar,
         scaffoldState = scaffoldState,
         sheetContent = { sheetContent() },
         floatingActionButton = {

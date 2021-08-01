@@ -10,4 +10,6 @@
 
     <string name="sets">Sets</string>
     <string name="search">Search</string>
+
+    <string name="cd_navigate_up">Navigate Up</string>
 </resources>

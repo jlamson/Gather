@@ -29,6 +29,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Sort
@@ -48,9 +49,12 @@ import androidx.navigation.NavController
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
+import com.darkmoose117.gather.ui.components.HomeNavigationIcon
 import com.darkmoose117.gather.ui.components.LoadingCard
+import com.darkmoose117.gather.ui.components.NavigateUpIcon
 import com.darkmoose117.gather.ui.components.ScrollToTopLazyColumn
 import com.darkmoose117.gather.ui.components.StaggeredGrid
+import com.darkmoose117.gather.ui.components.TopAppBarWithBottomContent
 import com.darkmoose117.gather.ui.nav.Nav
 import com.darkmoose117.gather.util.ThemedPreview
 import com.darkmoose117.scryfall.data.MagicSet
@@ -84,15 +88,15 @@ fun SetsContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Surface(
-            color = MaterialTheme.colors.surface,
-            contentColor = MaterialTheme.colors.onSurface
-        ) {
-            when (viewState) {
-                is SetsViewState.Loading -> LoadingCard()
-                is SetsViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
-                is SetsViewState.Success -> SetList(viewState, onSetClicked, onToggleSort, onToggleAllTypes, onToggleType)
-            }
+        TopAppBar(
+            title = { Text(stringResource(id = R.string.sets)) },
+            navigationIcon = { HomeNavigationIcon() }
+        )
+
+        when (viewState) {
+            is SetsViewState.Loading -> LoadingCard()
+            is SetsViewState.Failure -> ErrorCard(viewState.throwable.message ?: "Fuck.")
+            is SetsViewState.Success -> SetList(viewState, onSetClicked, onToggleSort, onToggleAllTypes, onToggleType)
         }
     }
 }

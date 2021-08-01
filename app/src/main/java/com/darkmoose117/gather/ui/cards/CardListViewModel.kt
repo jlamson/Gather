@@ -55,7 +55,7 @@ class CardListViewModel(
         updateViewState()
     }
 
-    fun buildViewState() = CardListViewState(sortedBy, cardsViewType)
+    fun buildViewState() = CardListViewState(query, sortedBy, cardsViewType)
 
     private fun updateViewState() { _viewState.postValue(buildViewState()) }
 
