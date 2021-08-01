@@ -12,6 +12,7 @@ import com.darkmoose117.scryfall.data.Card
 import com.darkmoose117.scryfall.data.DataList
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ScryfallCardsApi {
@@ -55,7 +56,7 @@ interface ScryfallCardsApi {
      */
     @GET("cards/{id}")
     suspend fun getCardById(
-        @Query("id") id: String,
+        @Path("id") id: String,
         @Query("format") format: String? = null,
         @Query("face") face: String? = null,
         @Query("version") version: String? = null,
