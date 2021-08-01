@@ -1,9 +1,11 @@
 package com.darkmoose117.gather.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,7 +31,9 @@ fun GatherUI() {
                 modifier = Modifier.padding(scaffoldPadding)
             ) {
                 composable(Dest.Sets.route) { SetsScreen(navController) }
-                composable(Dest.Search.route) { SearchScreen(navController) }
+                composable(Dest.Search.route) {
+                    SearchScreen(navController)
+                }
                 composable(Dest.CardList.route) { backStackEntry ->
                     CardListScreen(
                         navController = navController,

@@ -2,6 +2,8 @@
     <string name="app_name">Gather</string>
     <string name="back">Back</string>
     <string name="loading">Loading…</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 
     <string name="filter_sort_fab">Reveal a menu to sort/filter the list</string>
     <string name="scroll_to_stop">Scroll to top</string>
@@ -10,6 +12,11 @@
 
     <string name="sets">Sets</string>
     <string name="search">Search</string>
+    <string name="clear">Clear</string>
+
+    <string name="open_url_title">Open Url?</string>
+    <string name="open_url_message">Do you want to open this url in a browser?\n\n$1%s</string>
+
 
     <string name="cd_navigate_up">Navigate Up</string>
 </resources>
