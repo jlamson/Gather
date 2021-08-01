@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.darkmoose117.gather.ui.cards.CardsViewType
+import com.darkmoose117.gather.ui.cards.SymbolText
 import com.darkmoose117.gather.util.ThemedPreview
 import com.darkmoose117.scryfall.data.Card
 import com.darkmoose117.scryfall.data.ImageUriSize
@@ -35,22 +36,22 @@ fun CardListItem(card: Card, viewType: CardsViewType, modifier: Modifier = Modif
 fun CardText(card: Card, modifier: Modifier = Modifier) {
     Card(modifier, elevation = 2.dp) {
         Column(Modifier.padding(8.dp)) {
-            Text(
+            SymbolText(
                 text = card.manaCost ?: "(none)",
                 modifier = Modifier.align(Alignment.End),
                 style = MaterialTheme.typography.body1
             )
 
-            Text(
+            SymbolText(
                 text = card.name,
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.h6
             )
 
-            Text(text = card.typeLine, style = MaterialTheme.typography.subtitle2)
+            SymbolText(text = card.typeLine, style = MaterialTheme.typography.subtitle2)
 
             card.oracleText?.let {
-                Text(text = it, style = MaterialTheme.typography.body1)
+                SymbolText(text = it, style = MaterialTheme.typography.body1)
             }
 
             val numberText = if (!card.power.isNullOrBlank() || !card.toughness.isNullOrBlank()) {
@@ -60,7 +61,7 @@ fun CardText(card: Card, modifier: Modifier = Modifier) {
             } else null
 
             if (!numberText.isNullOrBlank()) {
-                Text(
+                SymbolText(
                     modifier = Modifier.align(Alignment.End),
                     text = numberText,
                     style = MaterialTheme.typography.subtitle1
