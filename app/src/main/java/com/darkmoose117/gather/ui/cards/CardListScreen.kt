@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyGridScope
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Button
@@ -30,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -120,70 +124,46 @@ fun CardList(
             )
         }
     ) {
-        var scale by remember { mutableStateOf(1f) }
-        var cells by remember { mutableStateOf(GridCells.Fixed(scale.roundToInt())) }
-        val columnMax = when (LocalConfiguration.current.orientation) {
-            Configuration.ORIENTATION_LANDSCAPE -> 5f
-            else -> 3f
-        }
-        val state = rememberTransformableState { zoomChange, _/*panChange*/, _/*rotationChange*/ ->
-            scale = (scale * (1 / zoomChange)).coerceIn(1f, columnMax)
-            cells = GridCells.Fixed(scale.roundToInt())
-        }
-        Box(
-            modifier = Modifier.transformable(state = state)
-        ) {
-            val itemSpacing = when (cells.count) {
-                1 -> 16.dp
-                2 -> 8.dp
-                else -> 4.dp
-            }
-            LazyVerticalGrid(
-                cells = cells,
-                contentPadding = PaddingValues(top = itemSpacing, start = itemSpacing)
-            ) {
-                items(count = lazyCards.itemCount) { index ->
-                    CardListItem(
-                        card = lazyCards[index]!!,
-                        viewType = viewState.cardsViewType,
-                        modifier = Modifier.padding(bottom = itemSpacing, end = itemSpacing)
-                    )
-                }
 
-                lazyCards.apply {
-                    when {
-                        loadState.refresh is LoadState.Loading -> {
-                            item {
-                                LoadingCard(modifier = Modifier.fillParentMaxSize())
-                            }
-                        }
-                        loadState.append is LoadState.Loading -> {
-                            item {
-                                CircularProgressIndicator(
-                                    Modifier
-                                        .size(48.dp)
-                                        .align(Alignment.Center)
-                                )
-                            }
-                        }
-                        loadState.refresh is LoadState.Error -> {
-                            val e = loadState.refresh as LoadState.Error
-                            item {
-                                ErrorCard(
-                                    modifier = Modifier.fillParentMaxSize(),
-                                    errorMessage = e.error.localizedMessage!!
-                                )
-                            }
-                        }
-                        loadState.append is LoadState.Error -> {
-                            val e = loadState.append as LoadState.Error
-                            item {
-                                ErrorCard(
-                                    errorMessage = e.error.localizedMessage!!
-                                )
-                            }
+        when (val state = lazyCards.loadState.refresh) {
+            is LoadState.Loading -> {
+                LoadingCard(modifier = Modifier.fillMaxWidth())
+            }
+            is LoadState.Error -> {
+                ErrorCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    errorMessage = state.error.localizedMessage!!
+                )
+            }
+        }
+
+        PinchToZoomLazyGrid(viewType = viewState.cardsViewType) { itemSpacing ->
+            items(count = lazyCards.itemCount) { index ->
+                CardListItem(
+                    card = lazyCards[index]!!,
+                    viewType = viewState.cardsViewType,
+                    modifier = Modifier.padding(bottom = itemSpacing, end = itemSpacing)
+                )
+            }
+
+            lazyCards.apply {
+                when (loadState.append) {
+                    is LoadState.Loading -> {
+                        item {
+                            CircularProgressIndicator(
+                                Modifier.size(48.dp)
+                            )
                         }
                     }
+                    is LoadState.Error -> {
+                        val e = loadState.append as LoadState.Error
+                        item {
+                            ErrorCard(
+                                errorMessage = e.error.localizedMessage!!
+                            )
+                        }
+                    }
+                    is LoadState.NotLoading -> Unit
                 }
             }
         }
@@ -236,4 +216,64 @@ fun ColumnScope.CardSortFilterBottomSheet(
             Text(text = "View Text")
         }
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PinchToZoomLazyGrid(
+    viewType: CardsViewType,
+    modifier: Modifier = Modifier,
+    lazyContent: LazyGridScope.(itemSpacing: Dp) -> Unit
+) {
+    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+    var scale by remember(viewType, isPortrait) {
+        mutableStateOf(
+            when (viewType) {
+                CardsViewType.Text -> 1f
+                CardsViewType.Image -> 2f
+            }
+        )
+    }
+    var cells by remember(scale) { mutableStateOf(GridCells.Fixed(scale.roundToInt())) }
+    val columnRange = remember(viewType, isPortrait) {
+        columnRange(viewType, isPortrait)
+    }
+    val state = rememberTransformableState { zoomChange, _/*panChange*/, _/*rotationChange*/ ->
+        scale = (scale * (1 / zoomChange)).coerceIn(columnRange)
+        cells = GridCells.Fixed(scale.roundToInt())
+    }
+    Box(
+        modifier = modifier.transformable(state = state)
+    ) {
+        val itemSpacing = when (cells.count) {
+            1 -> 16.dp
+            2 -> 8.dp
+            else -> 4.dp
+        }
+        LazyVerticalGrid(cells = cells, contentPadding = PaddingValues(itemSpacing)) {
+            lazyContent(itemSpacing)
+        }
+    }
+}
+
+fun columnRange(viewType: CardsViewType, isPortrait: Boolean): ClosedFloatingPointRange<Float> {
+    var min = 1f
+    var max = 1f
+    when (viewType) {
+        CardsViewType.Text -> {
+            min = 1f
+            max = 1f // TODO make better when I can stagger
+        }
+        CardsViewType.Image -> {
+            if (isPortrait) {
+                min = 1f
+                max = 3f
+            } else {
+                min = 3f
+                max = 5f
+            }
+        }
+    }
+
+    return min..max
 }
