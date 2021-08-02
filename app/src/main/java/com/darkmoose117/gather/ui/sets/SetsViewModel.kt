@@ -19,7 +19,8 @@ import timber.log.Timber
 class SetsViewModel : ViewModel() {
 
     private var sortedBy = SetsSortedBy.Date
-    private var loadedSets: List<MagicSet>? = null
+    private var setsByName: List<MagicSetRow>? = null
+    private var setsByDate: List<MagicSetRow>? = null
     private var typeFilters: MutableMap<String, Boolean> = mutableMapOf()
     private var typeCount: Map<String, Int> = mapOf()
 
@@ -46,7 +47,8 @@ class SetsViewModel : ViewModel() {
             if (response.isSuccessful) {
                 val sets = response.body()?.data
                 if (!sets.isNullOrEmpty()) {
-                    loadedSets = sets
+                    setsByName = sets.sortedBy { it.name }.map { MagicSetRow(0, it) }
+                    setsByDate = buildSetsByDate(sets)
                     typeCount = sets.groupingBy { it.setType }.eachCount()
                     typeFilters = sets.map { it.setType }.toSet().associateWith { true }.toMutableMap()
 
@@ -88,22 +90,57 @@ class SetsViewModel : ViewModel() {
     }
 
     private fun updateList() {
-        val safeSets = loadedSets ?: return
         val safeSort = sortedBy
+        val safeSets = when (safeSort) {
+            SetsSortedBy.Name -> setsByName
+            SetsSortedBy.Date -> setsByDate
+        } ?: return
         _viewState.postValue(
             Success(
-                safeSets.sortedWith(safeSort),
+                safeSets.filter { typeFilters[it.set.setType] == true },
                 buildTypeDescriptors(),
                 safeSort
             )
         )
     }
 
-    private fun List<MagicSet>.sortedWith(sort: SetsSortedBy): List<MagicSet> = when (sort) {
-        SetsSortedBy.Name -> this.sortedBy { it.name }
-        SetsSortedBy.Date -> this.sortedByDescending { it.releasedAt }
-    }.filter {
-        typeFilters[it.setType] == true
+    private fun buildSetsByDate(sets: List<MagicSet>): List<MagicSetRow> {
+        val noParentsSets = mutableListOf<MagicSet>()
+        val childrenSets = mutableMapOf<String, MutableList<MagicSet>>()
+        sets.forEach { set ->
+            val parentSetCode: String? = set.parentSetCode
+            if (parentSetCode == null) {
+                noParentsSets.add(set)
+            } else {
+                val childrenList = if (childrenSets.containsKey(parentSetCode)) {
+                    childrenSets[parentSetCode]!!
+                } else {
+                    val newList = mutableListOf<MagicSet>()
+                    childrenSets[parentSetCode] = newList
+                    newList
+                }
+
+                childrenList.add(set)
+            }
+        }
+
+        noParentsSets.sortByDescending(MagicSet::releasedAt)
+
+        val rows: MutableList<MagicSetRow> = mutableListOf()
+        var depth = 0
+        fun addSetThenChildren(set: MagicSet) {
+            rows.add(MagicSetRow(depth, set))
+            depth += 1
+            childrenSets[set.code]?.forEach { child ->
+                addSetThenChildren(child)
+            }
+            depth -= 1
+        }
+        noParentsSets.forEach { set ->
+            addSetThenChildren(set)
+        }
+
+        return rows.toList()
     }
 
     private fun buildTypeDescriptors(): List<TypeDescriptor> = typeFilters.keys
@@ -115,7 +152,7 @@ class SetsViewModel : ViewModel() {
 sealed class SetsViewState {
     object Loading : SetsViewState()
     data class Success(
-        val sets: List<MagicSet>,
+        val sets: List<MagicSetRow>,
         val typeDescriptors: List<TypeDescriptor>,
         val setsSortedBy: SetsSortedBy
     ) : SetsViewState()
@@ -134,3 +171,8 @@ data class TypeDescriptor(
 enum class SetsSortedBy {
     Name, Date
 }
+
+data class MagicSetRow(
+    val depth: Int,
+    val set: MagicSet
+)

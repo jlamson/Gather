@@ -3,6 +3,7 @@ package com.darkmoose117.gather.ui.sets
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,11 +13,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,12 +47,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
+import coil.size.Scale
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
@@ -120,21 +131,23 @@ fun SetList(
             )
         }
     ) {
-        ScrollToTopLazyColumn {
-            val grouped: Map<String, List<MagicSet>> = when (state.setsSortedBy) {
+        ScrollToTopLazyColumn(
+            verticalSpacing = 4.dp
+        ) {
+            val grouped: Map<String, List<MagicSetRow>> = when (state.setsSortedBy) {
                 SetsSortedBy.Name -> state.sets.groupBy {
-                    val first = it.name.first().toString()
+                    val first = it.set.name.first().toString()
                     if (first.toIntOrNull() != null) "#" else first
                 }
-                SetsSortedBy.Date -> state.sets.groupBy { it.releasedAt.substring(0..3) }
+                SetsSortedBy.Date -> state.sets.groupBy { it.set.releasedAt?.substring(0..3) ?: "???"}
             }
             grouped.forEach { (groupLabel, sets) ->
                 stickyHeader(groupLabel) {
                     SetGroupHeader(groupLabel)
                 }
 
-                items(items = sets, key = { it.code }) { set ->
-                    SetItem(set, modifier = Modifier.clickable(onClick = { onSetClicked(set.code) }))
+                items(items = sets, key = { it.set.code }) { row ->
+                    SetItem(row, modifier = Modifier.clickable(onClick = { onSetClicked(row.set.code) }))
                 }
             }
         }
@@ -159,14 +172,39 @@ private fun SetGroupHeader(groupLabel: String) {
 }
 
 @Composable
-fun SetItem(set: MagicSet, modifier: Modifier) {
+fun SetItem(row: MagicSetRow, modifier: Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .requiredHeightIn(min = 48.dp)
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = set.code, Modifier.defaultMinSize(minWidth = 48.dp), style = MaterialTheme.typography.subtitle2)
+        val (depth, set) = row
+
+        repeat (depth) { i ->
+            val bg = when (i % 3) {
+                0 -> Color.Magenta
+                1 -> Color.Blue
+                else -> Color.Green
+            }
+            Box(
+                Modifier
+                    .fillMaxHeight()
+                    .width(24.dp)
+                    .background(bg)) { }
+        }
+
+        Icon(
+            painter = rememberImagePainter(data = set.iconSvgUri) { scale(Scale.FIT) },
+            contentDescription = set.name,
+            modifier = modifier
+                .align(Alignment.CenterVertically)
+                .size(32.dp, 32.dp)
+        )
+
+        Spacer(modifier = Modifier.width(4.dp))
+
         Text(set.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.h5)
     }
 }
@@ -280,72 +318,3 @@ fun TypeChip(
         }
     }
 }
-
-
-// region Previews
-
-val previewLoadingState = SetsViewState.Loading
-val previewFailedState = SetsViewState.Failure(Throwable("Forced"))
-// should show AAA, DDD, CCC, BBB
-val previewSuccessState = SetsViewState.Success(
-    sets = mutableListOf<MagicSet>().apply {
-        for (char in listOf('A', 'A', 'A', 'B', 'B', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C')) {
-            this.add(MagicSet(
-                code = "$char$char$char",
-                name = "$char$char$char Set name",
-                setType = "Promo",
-                releasedAt = "2021-02-25"
-            ))
-        }
-    },
-    listOf(
-        TypeDescriptor("FilterOn", 10,true),
-        TypeDescriptor("FilterOff", 8, false),
-        TypeDescriptor("FilterA", 18894, true),
-        TypeDescriptor("FilterB", 1, false),
-        TypeDescriptor("FilterC", 17, true),
-        TypeDescriptor("FilterD", 22, false),
-        TypeDescriptor("FilterOn", 10,false),
-        TypeDescriptor("FilterOff", 8, true),
-        TypeDescriptor("FilterA", 18894, false),
-        TypeDescriptor("FilterB", 1, true),
-        TypeDescriptor("FilterC", 17, false),
-        TypeDescriptor("FilterD", 22, true),
-    ),
-    setsSortedBy = SetsSortedBy.Name
-)
-
-val testState = previewSuccessState
-
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalFoundationApi
-@Preview(widthDp = 360, heightDp = 480, showBackground = true)
-@Composable
-fun BottomSheet() {
-    ThemedPreview(darkTheme = true) {
-        Column {
-            SetSortFilterBottomSheet(previewSuccessState, {}, {}, {})
-        }
-    }
-}
-
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalFoundationApi
-@Preview(widthDp = 360, heightDp = 480, showBackground = true)
-@Composable
-fun LightSetsScreen() {
-    ThemedPreview { SetsContent(testState, {}, {}, {}, {}) }
-}
-
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalFoundationApi
-@Preview(widthDp = 360, heightDp = 480, showBackground = true)
-@Composable
-fun DarkSetsScreen() {
-    ThemedPreview(darkTheme = true) { SetsContent(testState, {}, {}, {}, {}) }
-}
-
-// endregion
