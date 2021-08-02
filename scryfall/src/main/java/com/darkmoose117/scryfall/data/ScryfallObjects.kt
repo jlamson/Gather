@@ -60,25 +60,25 @@ data class MagicSet(
     /** The unique three to five-letter code for this set. */
     @Json(name = "code") val code: String = "",
     /** The unique code for this set on MTGO, which may differ from the regular code. */
-    @Json(name = "mtgo_code") val mtgoCode: String = "",
+    @Json(name = "mtgo_code") val mtgoCode: String? = null,
     /** This set’s ID on TCGplayer’s API, also known as the groupId. */
-    @Json(name = "tcgplayer_id") val tcgplayerId: Int = -1,
+    @Json(name = "tcgplayer_id") val tcgplayerId: Int? = null,
     /** The English name of the set. */
     @Json(name = "name") val name: String = "",
     /** A computer-readable classification for this set. See below. */
     @Json(name = "set_type") val setType: String = "",
     /** The date the set was released or the first card was printed in the set (in GMT-8 Pacific time). */
-    @Json(name = "released_at") val releasedAt: String = "",
+    @Json(name = "released_at") val releasedAt: String? = null,
     /** The block code for this set, if any. */
-    @Json(name = "block_code") val blockCode: String = "",
+    @Json(name = "block_code") val blockCode: String? = null,
     /** The block or group name code for this set, if any. */
-    @Json(name = "block") val block: String = "",
+    @Json(name = "block") val block: String? = null,
     /** The set code for the parent set, if any. promo and token sets often have a parent set. */
-    @Json(name = "parent_set_code") val parentSetCode: String = "",
+    @Json(name = "parent_set_code") val parentSetCode: String? = null,
     /** The number of cards in this set. */
-    @Json(name = "card_count") val cardCount: Int = -1,
+    @Json(name = "card_count") val cardCount: Int = 0,
     /** The denominator for the set’s printed collector numbers. */
-    @Json(name = "printed_size") val printedSize: Int = -1,
+    @Json(name = "printed_size") val printedSize: Int? = null,
     /** True if this set was only released in a video game. */
     @Json(name = "digital") val digital: Boolean = false,
     /** True if this set contains only foil cards. */
