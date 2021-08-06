@@ -39,4 +39,6 @@ enum class FrameEffect {
     @Json(name = "etched") Etched,
     /** The cards have the snowy frame effect */
     @Json(name = "snow") Snow,
+    /** TODO */
+    @Json(name = "fullart") FullArt,
 }
