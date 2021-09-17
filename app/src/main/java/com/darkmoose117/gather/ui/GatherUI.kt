@@ -43,10 +43,14 @@ fun GatherUI(
                     startDestination = Dest.Sets.route,
                     modifier = Modifier.padding(scaffoldPadding)
                 ) {
-                    composable(Dest.Sets.route) { SetsScreen(navController) }
+                    composable(Dest.Sets.route) {
+                        SetsScreen(navController)
+                    }
+
                     composable(Dest.Search.route) {
                         SearchScreen(navController)
                     }
+
                     composable(Dest.CardList.route) { backStackEntry ->
                         CardListScreen(
                             navController = navController,
@@ -54,6 +58,7 @@ fun GatherUI(
                             query = backStackEntry.arguments?.getString(Nav.Args.QUERY)!!
                         )
                     }
+
                     composable(Dest.CardDetail.route) { backStackEntry ->
                         CardDetailScreen(
                             navController = navController,

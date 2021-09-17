@@ -8,18 +8,15 @@ object Nav {
     }
 
     sealed class Dest(
-        open val route: String,
-        open val title: String? = null
+        open val route: String
     ) {
 
         object Sets : Dest(
-            route = "sets",
-            title = "Sets"
+            route = "sets"
         )
 
         object Search : Dest(
-            route = "search",
-            title = "Search"
+            route = "search"
         )
 
         object CardList : Dest(
