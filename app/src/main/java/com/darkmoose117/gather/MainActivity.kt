@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
 
     private val symbolsViewModel by viewModels<SymbolsViewModel> {
         object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(SymbolsViewModel::class.java)) {
                     return SymbolsViewModel(application as GatherApp) as T
                 }

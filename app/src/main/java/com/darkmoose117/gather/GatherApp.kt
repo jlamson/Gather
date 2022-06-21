@@ -4,6 +4,7 @@ import android.app.Application
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.SvgDecoder
+import coil.disk.DiskCache
 import coil.util.CoilUtils
 import coil.util.DebugLogger
 import okhttp3.OkHttpClient
@@ -18,15 +19,19 @@ class GatherApp: Application(), ImageLoaderFactory {
     }
 
     override fun newImageLoader(): ImageLoader = ImageLoader.Builder(applicationContext)
-        .componentRegistry {
-            add(SvgDecoder(this@GatherApp))
+        .components {
+            add(SvgDecoder.Factory(true))
         }
         .crossfade(true)
         .logger(DebugLogger())
         .okHttpClient {
-            OkHttpClient.Builder()
-                .cache(CoilUtils.createDefaultCache(applicationContext))
+            OkHttpClient.Builder().build()
+        }
+        .diskCache {
+            DiskCache.Builder()
+                .directory(this@GatherApp.cacheDir.resolve("image_cache"))
                 .build()
+
         }
         .build()
 }

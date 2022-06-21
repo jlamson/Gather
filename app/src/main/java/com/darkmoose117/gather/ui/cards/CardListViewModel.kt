@@ -7,13 +7,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.darkmoose117.gather.data.cards.CardRepository
 import com.darkmoose117.gather.data.cards.PagedCardSource
-import com.darkmoose117.gather.util.CoroutineContextProvider
-import com.darkmoose117.scryfall.ScryfallApi
 import com.darkmoose117.scryfall.api.cards.ScryfallCardsApi
-import com.darkmoose117.scryfall.api.params.Order
-import com.darkmoose117.scryfall.data.Card
-import kotlinx.coroutines.CoroutineExceptionHandler
-import timber.log.Timber
 
 class CardListViewModel(
     private val query: String,

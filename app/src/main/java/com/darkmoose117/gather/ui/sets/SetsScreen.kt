@@ -39,12 +39,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.size.Scale
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.ErrorCard
@@ -168,14 +172,19 @@ fun SetItem(row: MagicSetRow, modifier: Modifier) {
                 else -> Color.Green
             }
             Box(
-                Modifier
+                modifier = Modifier
                     .fillMaxHeight()
                     .width(24.dp)
-                    .background(bg)) { }
+                    .background(bg),
+                content = { }
+            )
         }
 
         Icon(
-            painter = rememberImagePainter(data = set.iconSvgUri) { scale(Scale.FIT) },
+            painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(LocalContext.current).data(set.iconSvgUri).build(),
+                contentScale = ContentScale.Fit
+            ),
             contentDescription = set.name,
             modifier = modifier
                 .align(Alignment.CenterVertically)

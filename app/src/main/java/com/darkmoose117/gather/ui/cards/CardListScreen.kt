@@ -61,7 +61,7 @@ fun CardListScreen(
     query: String
 ) {
     val viewModel: CardListViewModel = viewModel(factory = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(CardListViewModel::class.java)) {
                 return CardListViewModel(query, repository) as T
             } else throw IllegalArgumentException("Invalid modelClass $modelClass")

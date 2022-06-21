@@ -10,7 +10,7 @@ class CoroutineContextProvider(
     initialDefault: CoroutineContext = Dispatchers.Default,
     initialIo: CoroutineContext = Dispatchers.IO,
     handler: CoroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Timber.tag(CoroutineContextProvider::class.simpleName)
+        Timber.tag(CoroutineContextProvider::class.java.simpleName)
             .e(throwable, "Crash in Coroutine")
     }
 ) {
