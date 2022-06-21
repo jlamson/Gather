@@ -13,4 +13,6 @@ enum class Frame {
     @Json(name = "2015") Holofoil,
     /** The frame used on cards from the future */
     @Json(name = "future") Future,
+    /** Not Handled. This is a client error, check for API updates */
+    @Json(name = "not_handled") NotHandled,
 }

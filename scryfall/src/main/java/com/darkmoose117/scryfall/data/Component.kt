@@ -7,4 +7,5 @@ enum class Component {
     @Json(name = "meld_part") MeldPart,
     @Json(name = "meld_result") MeldResult,
     @Json(name = "combo_piece") ComboPiece,
+    @Json(name = "not_handled") NotHandled,
 }

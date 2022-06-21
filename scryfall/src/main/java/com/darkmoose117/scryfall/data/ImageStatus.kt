@@ -6,5 +6,6 @@ enum class ImageStatus {
     @Json(name = "missing") Missing,
     @Json(name = "placeholder") Placeholder,
     @Json(name = "lowres") LowFes,
-    @Json(name = "highres_scan") HighFesScan
+    @Json(name = "highres_scan") HighFesScan,
+    @Json(name = "not_handled") NotHandled
 }

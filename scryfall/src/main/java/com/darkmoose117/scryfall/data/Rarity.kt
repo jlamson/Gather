@@ -9,4 +9,5 @@ enum class Rarity {
     @Json(name = "special") Special,
     @Json(name = "mythic") Mythic,
     @Json(name = "bonus") Bonus,
+    @Json(name = "not_handled") NotHandled,
 }

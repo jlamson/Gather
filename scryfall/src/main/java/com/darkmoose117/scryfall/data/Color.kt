@@ -9,4 +9,5 @@ enum class Color {
     @Json(name = "R") Red,
     @Json(name = "G") Green,
     @Json(name = "C") Colorless,
+    @Json(name = "?") NotHandled
 }

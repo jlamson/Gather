@@ -7,4 +7,5 @@ enum class Legality {
     @Json(name = "not_legal") NotLegal,
     @Json(name = "restricted") Restricted,
     @Json(name = "banned") Banned,
+    @Json(name = "not_handled") NotHandled,
 }

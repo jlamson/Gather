@@ -8,4 +8,5 @@ enum class BorderColor {
     @Json(name = "gold") Gold,
     @Json(name = "silver") Silver,
     @Json(name = "white") White,
+    @Json(name = "not_handled") NotHandled,
 }

@@ -20,7 +20,7 @@ object ScryfallApi {
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = Level.HEADERS
+                level = Level.BODY
             })
             .build()
     }

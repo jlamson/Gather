@@ -41,4 +41,6 @@ enum class FrameEffect {
     @Json(name = "snow") Snow,
     /** The cards have the Lesson frame effect */
     @Json(name = "lesson") Lesson,
+    /** Unknown frame-effect. This is a client-side error, check for new type unhandled */
+    @Json(name = "not_handled") NotHandled
 }

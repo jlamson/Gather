@@ -26,20 +26,6 @@ class ScryfallObjectParsingTests {
             .build()
     }
 
-    private fun loadFileIntoString(fileName: String): String {
-        val classLoader = this.javaClass.classLoader
-        val file = classLoader.getResource(fileName)?.let { url ->
-            File(url.file)
-        }
-        assertNotNull(file)
-        assert(file!!.exists())
-
-        val jsonAsString = file.readText()
-        assert(jsonAsString.isNotBlank())
-
-        return jsonAsString
-    }
-
     @Test
     fun `should not crash on any card`() {
         val jsonAsString = loadFileIntoString("order_cmc_c_red_pow_3.json")
