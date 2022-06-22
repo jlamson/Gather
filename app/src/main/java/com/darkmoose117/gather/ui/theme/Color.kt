@@ -18,6 +18,17 @@ val LightBlue300 = Color(0xFF4FC3F7)
 val LightBlue300Light = Color(0xFF8BF6FF)
 val LightBlue300Dark = Color(0xFF0093C4)
 
+val MtgGreenBg = Color(196, 211, 202)
+val MtgGreenFg = Color(0, 115, 62)
+val MtgBlueBg = Color(179, 206, 234)
+val MtgBlueFg = Color(14, 104, 171)
+val MtgRedBg = Color(235, 159, 130)
+val MtgRedFg = Color(211, 32, 42)
+val MtgWhiteBg = Color(248, 231, 185)
+val MtgWhiteFg = Color(249, 250, 244)
+val MtgBlackBg = Color(166, 159, 157)
+val MtgBlackFg = Color(21, 11, 0)
+
 
 /**
  * Return the fully opaque color that results from compositing [onSurface] atop [surface] with the
