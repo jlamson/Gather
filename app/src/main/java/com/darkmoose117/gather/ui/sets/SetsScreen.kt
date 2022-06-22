@@ -39,18 +39,17 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
-import coil.size.Scale
 import com.darkmoose117.gather.R
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
@@ -166,27 +165,15 @@ fun SetItem(row: MagicSetRow, modifier: Modifier) {
     ) {
         val (depth, set) = row
 
-        repeat (depth) { i ->
-            val bg = when (i % 3) {
-                0 -> Color.Magenta
-                1 -> Color.Blue
-                else -> Color.Green
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(24.dp)
-                    .background(bg),
-                content = { }
-            )
+        repeat (depth) {
+            Spacer(modifier = Modifier.fillMaxHeight().width(24.dp))
         }
 
-        Icon(
-            painter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(LocalContext.current).data(set.iconSvgUri).build(),
-                contentScale = ContentScale.Fit
-            ),
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).data(set.iconSvgUri).build(),
+            contentScale = ContentScale.Fit,
             contentDescription = set.name,
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface),
             modifier = modifier
                 .align(Alignment.CenterVertically)
                 .size(32.dp, 32.dp)

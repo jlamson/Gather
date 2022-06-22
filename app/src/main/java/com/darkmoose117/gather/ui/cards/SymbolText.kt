@@ -1,10 +1,8 @@
 package com.darkmoose117.gather.ui.cards
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +16,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import coil.compose.rememberImagePainter
+import coil.compose.AsyncImage
 import com.darkmoose117.gather.ui.LocalSymbolProvider
 import com.darkmoose117.scryfall.data.CardSymbol
 
@@ -73,8 +71,8 @@ fun inlineSymbolContent(cardSymbol: CardSymbol): InlineTextContent {
     return InlineTextContent(
         Placeholder(1.em, 1.em, PlaceholderVerticalAlign.TextCenter)
     ) { altText ->
-        Image(
-            painter = rememberImagePainter(data = cardSymbol.svgUri),
+        AsyncImage(
+            model = cardSymbol.svgUri,
             contentDescription = altText,
             modifier = Modifier.defaultMinSize(12.dp, 12.dp)
         )
