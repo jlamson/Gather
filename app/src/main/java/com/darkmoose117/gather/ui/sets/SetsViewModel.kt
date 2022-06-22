@@ -9,23 +9,24 @@ import com.darkmoose117.gather.ui.sets.SetsViewState.Failure
 import com.darkmoose117.gather.ui.sets.SetsViewState.Loading
 import com.darkmoose117.gather.ui.sets.SetsViewState.Success
 import com.darkmoose117.gather.util.CoroutineContextProvider
-import com.darkmoose117.scryfall.ScryfallApi
 import com.darkmoose117.scryfall.api.sets.ScryfallSetsApi
 import com.darkmoose117.scryfall.data.MagicSet
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class SetsViewModel : ViewModel() {
+@HiltViewModel
+class SetsViewModel @Inject constructor(
+    private val setsApi: ScryfallSetsApi
+) : ViewModel() {
 
     private var sortedBy = SetsSortedBy.Date
     private var setsByName: List<MagicSetRow>? = null
     private var setsByDate: List<MagicSetRow>? = null
     private var typeFilters: MutableMap<String, Boolean> = mutableMapOf()
     private var typeCount: Map<String, Int> = mapOf()
-
-    // TODO Inject
-    private val setsApi: ScryfallSetsApi = ScryfallApi.setsApi
 
     private val contextProvider = CoroutineContextProvider(handler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable)

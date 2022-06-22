@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -63,7 +64,7 @@ import com.darkmoose117.gather.ui.nav.Nav
 fun SetsScreen(
     navController: NavController
 ) {
-    val viewModel: SetsViewModel = viewModel()
+    val viewModel: SetsViewModel = hiltViewModel()
     val viewState by viewModel.viewState.observeAsState(initial = SetsViewState.Loading)
     SetsContent(
         viewState = viewState,

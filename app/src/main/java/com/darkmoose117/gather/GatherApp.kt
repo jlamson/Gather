@@ -7,9 +7,11 @@ import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.util.CoilUtils
 import coil.util.DebugLogger
+import dagger.hilt.android.HiltAndroidApp
 import okhttp3.OkHttpClient
 import timber.log.Timber
 
+@HiltAndroidApp
 class GatherApp: Application(), ImageLoaderFactory {
 
     override fun onCreate() {
@@ -31,7 +33,6 @@ class GatherApp: Application(), ImageLoaderFactory {
             DiskCache.Builder()
                 .directory(this@GatherApp.cacheDir.resolve("image_cache"))
                 .build()
-
         }
         .build()
 }

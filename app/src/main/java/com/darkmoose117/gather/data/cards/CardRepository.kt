@@ -9,8 +9,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import retrofit2.HttpException
 import timber.log.Timber
+import javax.inject.Inject
 
-class CardRepository(
+class CardRepository @Inject constructor(
     private val api: ScryfallCardsApi,
 ) {
 

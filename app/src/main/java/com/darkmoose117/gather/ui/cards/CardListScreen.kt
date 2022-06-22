@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,18 +57,9 @@ import kotlin.math.roundToInt
 
 @Composable
 fun CardListScreen(
-    navController: NavController,
-    repository: CardRepository,
-    query: String
+    navController: NavController
 ) {
-    val viewModel: CardListViewModel = viewModel(factory = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(CardListViewModel::class.java)) {
-                return CardListViewModel(query, repository) as T
-            } else throw IllegalArgumentException("Invalid modelClass $modelClass")
-        }
-    })
-
+    val viewModel: CardListViewModel = hiltViewModel()
     val lazyCardList = viewModel.cardsPager.flow.collectAsLazyPagingItems()
     val viewState by viewModel.viewState.observeAsState(viewModel.buildViewState())
 

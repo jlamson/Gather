@@ -12,12 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.darkmoose117.gather.R
-import com.darkmoose117.gather.data.cards.CardRepository
 import com.darkmoose117.gather.ui.cards.CardDetailViewState.Failure
 import com.darkmoose117.gather.ui.cards.CardDetailViewState.Loading
 import com.darkmoose117.gather.ui.cards.CardDetailViewState.Success
@@ -28,17 +25,9 @@ import com.darkmoose117.scryfall.data.Card
 
 @Composable
 fun CardDetailScreen(
-    navController: NavController,
-    repository: CardRepository,
-    id: String
+    navController: NavController
 ) {
-    val viewModel: CardDetailViewModel = viewModel(factory = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(CardDetailViewModel::class.java)) {
-                return CardDetailViewModel(id, repository) as T
-            } else throw IllegalArgumentException("Invalid modelClass $modelClass")
-        }
-    })
+    val viewModel: CardDetailViewModel = hiltViewModel()
     val viewState by viewModel.viewState.observeAsState(Loading)
 
     CardDetailContent(
