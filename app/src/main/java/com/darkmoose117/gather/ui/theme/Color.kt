@@ -7,10 +7,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.Dp
 
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
 val Yellow900 = Color(0xFFF47E17)
 val Yellow900Light = Color(0xFFFFAF4C)
 val Yellow900Dark = Color(0xFFBB5000)

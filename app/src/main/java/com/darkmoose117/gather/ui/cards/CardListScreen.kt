@@ -18,9 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyGridScope
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
@@ -28,6 +28,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -39,14 +40,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.darkmoose117.gather.data.cards.CardRepository
 import com.darkmoose117.gather.ui.components.ErrorCard
 import com.darkmoose117.gather.ui.components.FabRevealedBottomSheetScaffold
 import com.darkmoose117.gather.ui.components.LoadingCard
@@ -126,6 +123,7 @@ fun CardList(
                     errorMessage = state.error.localizedMessage!!
                 )
             }
+            else -> Unit
         }
 
         PinchToZoomLazyGrid(viewType = viewState.cardsViewType) { itemSpacing ->
@@ -232,23 +230,30 @@ fun PinchToZoomLazyGrid(
             }
         )
     }
-    var cells by remember(scale) { mutableStateOf(GridCells.Fixed(scale.roundToInt())) }
+    val columnCount by remember(scale) {
+        derivedStateOf { scale.roundToInt() }
+    }
+    val itemSpacing by remember(columnCount) {
+        derivedStateOf {
+            when (columnCount) {
+                1 -> 16.dp
+                2 -> 8.dp
+                else -> 4.dp
+            }
+        }
+    }
+    var cells by remember(columnCount) { mutableStateOf(GridCells.Fixed(columnCount)) }
     val columnRange = remember(viewType, isPortrait) {
         columnRange(viewType, isPortrait)
     }
     val state = rememberTransformableState { zoomChange, _/*panChange*/, _/*rotationChange*/ ->
         scale = (scale * (1 / zoomChange)).coerceIn(columnRange)
-        cells = GridCells.Fixed(scale.roundToInt())
+        cells = GridCells.Fixed(columnCount)
     }
     Box(
         modifier = modifier.transformable(state = state)
     ) {
-        val itemSpacing = when (cells.count) {
-            1 -> 16.dp
-            2 -> 8.dp
-            else -> 4.dp
-        }
-        LazyVerticalGrid(cells = cells, contentPadding = PaddingValues(itemSpacing)) {
+        LazyVerticalGrid(columns = cells, contentPadding = PaddingValues(itemSpacing)) {
             lazyContent(itemSpacing)
         }
     }
